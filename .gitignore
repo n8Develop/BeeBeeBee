@@ -11,6 +11,9 @@ dist/
 build/
 .svelte-kit/
 
+# Database
+data/
+
 # Uploads (user content, not committed)
 uploads/
 
