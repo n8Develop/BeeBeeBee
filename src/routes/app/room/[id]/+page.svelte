@@ -5,6 +5,7 @@
   import { socket } from '$lib/socket.svelte.js';
   import { api } from '$lib/api.js';
   import Avatar from '$lib/social/Avatar.svelte';
+  import FriendsList from '$lib/social/FriendsList.svelte';
   import ChatFeed from '$lib/chat/ChatFeed.svelte';
   import MessageInput from '$lib/chat/MessageInput.svelte';
   import TypingIndicator from '$lib/chat/TypingIndicator.svelte';
@@ -13,15 +14,15 @@
   let roomId = data.roomId;
 
   let roomName = $state('');
+  let inviteCode = $state('');
+  let codeCopied = $state(false);
   let roomError = $state(null);
   let showMembers = $state(false);
+  let showFriends = $state(false);
 
   onMount(() => {
-    // Connect socket and join room
     socket.connect();
     socket.joinRoom(roomId);
-
-    // Fetch room details
     fetchRoomDetails();
 
     return () => {
@@ -33,9 +34,18 @@
     try {
       const room = await api.get(`/api/rooms/${roomId}`);
       roomName = room.name || 'Room';
+      inviteCode = room.inviteCode || '';
     } catch (err) {
       roomError = err.message;
     }
+  }
+
+  async function copyInviteCode() {
+    try {
+      await navigator.clipboard.writeText(inviteCode);
+      codeCopied = true;
+      setTimeout(() => { codeCopied = false; }, 2000);
+    } catch {}
   }
 
   async function handleLeaveRoom() {
@@ -43,7 +53,6 @@
       await api.post(`/api/rooms/${roomId}/leave`);
       goto('/app');
     } catch (err) {
-      // If it fails, still navigate back
       goto('/app');
     }
   }
@@ -52,12 +61,10 @@
     goto('/app');
   }
 
-  // Filter typing users to exclude current user
   let filteredTypingUsers = $derived(
     socket.typingUsers.filter((u) => u.userId !== auth.user?.id)
   );
 
-  // Count online members
   let onlineCount = $derived(
     socket.members.filter((m) => m.online).length
   );
@@ -75,8 +82,18 @@
         </span>
       </div>
     </div>
+    {#if inviteCode}
+      <button class="invite-code" onclick={copyInviteCode} title="Click to copy invite code">
+        <span class="invite-label">Invite:</span>
+        <span class="invite-value">{inviteCode}</span>
+        <span class="invite-copy">{codeCopied ? 'Copied!' : 'Copy'}</span>
+      </button>
+    {/if}
     <div class="header-right">
-      <button class="members-toggle" onclick={() => { showMembers = !showMembers; }}>
+      <button class="header-toggle" class:active={showFriends} onclick={() => { showFriends = !showFriends; }}>
+        Friends
+      </button>
+      <button class="header-toggle" class:active={showMembers} onclick={() => { showMembers = !showMembers; }}>
         Members
       </button>
       <button class="leave-btn" onclick={handleLeaveRoom}>Leave</button>
@@ -98,7 +115,7 @@
   {/if}
 
   <div class="room-body">
-    <!-- Members sidebar (toggleable) -->
+    <!-- Members sidebar (left, toggleable) -->
     {#if showMembers}
       <aside class="members-sidebar">
         <h3>Members</h3>
@@ -124,6 +141,13 @@
       <TypingIndicator users={filteredTypingUsers} />
       <MessageInput {roomId} />
     </div>
+
+    <!-- Friends sidebar (right, toggleable) -->
+    {#if showFriends}
+      <aside class="friends-sidebar">
+        <FriendsList />
+      </aside>
+    {/if}
   </div>
 </div>
 
@@ -144,6 +168,7 @@
     background: #16213e;
     border-bottom: 1px solid #334;
     flex-shrink: 0;
+    gap: 12px;
   }
 
   .header-left {
@@ -187,13 +212,46 @@
     color: #888;
   }
 
+  .invite-code {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid #334;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .invite-code:hover {
+    background: #2a2a4e;
+  }
+
+  .invite-label {
+    font-size: 11px;
+    color: #888;
+  }
+
+  .invite-value {
+    font-family: monospace;
+    font-size: 12px;
+    color: #7eb8da;
+  }
+
+  .invite-copy {
+    font-size: 11px;
+    color: #4ade80;
+    margin-left: 2px;
+  }
+
   .header-right {
     display: flex;
     gap: 8px;
     flex-shrink: 0;
   }
 
-  .members-toggle {
+  .header-toggle {
     padding: 5px 10px;
     border: 1px solid #334;
     border-radius: 4px;
@@ -203,8 +261,13 @@
     cursor: pointer;
   }
 
-  .members-toggle:hover {
+  .header-toggle:hover {
     background: #555;
+  }
+
+  .header-toggle.active {
+    background: #2a5a8a;
+    border-color: #3a7aba;
   }
 
   .leave-btn {
@@ -313,5 +376,13 @@
     flex-direction: column;
     min-width: 0;
     min-height: 0;
+  }
+
+  .friends-sidebar {
+    width: 220px;
+    border-left: 1px solid #334;
+    background: #12192e;
+    overflow-y: auto;
+    flex-shrink: 0;
   }
 </style>

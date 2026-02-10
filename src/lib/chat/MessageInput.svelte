@@ -5,12 +5,12 @@
 
   let { roomId } = $props();
 
-  let activeTab = $state('draw');
   let textContent = $state('');
   let imageFile = $state(null);
   let imagePreview = $state(null);
   let uploading = $state(false);
   let uploadError = $state(null);
+  let fileInputEl = $state(null);
 
   // Typing indicator state
   let isTyping = $state(false);
@@ -65,7 +65,6 @@
     imageFile = file;
     uploadError = null;
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = (ev) => {
       imagePreview = ev.target.result;
@@ -94,8 +93,7 @@
       }
 
       socket.sendMessage(roomId, 'image', data.url);
-      imageFile = null;
-      imagePreview = null;
+      clearImage();
     } catch (err) {
       uploadError = err.message;
     } finally {
@@ -107,67 +105,56 @@
     imageFile = null;
     imagePreview = null;
     uploadError = null;
+    if (fileInputEl) fileInputEl.value = '';
   }
 </script>
 
 <div class="message-input">
-  <div class="tabs">
-    <button class="tab" class:active={activeTab === 'draw'} onclick={() => { activeTab = 'draw'; }}>Draw</button>
-    <button class="tab" class:active={activeTab === 'text'} onclick={() => { activeTab = 'text'; }}>Text</button>
-    <button class="tab" class:active={activeTab === 'image'} onclick={() => { activeTab = 'image'; }}>Image</button>
+  <!-- Canvas always visible -->
+  <div class="draw-area">
+    <Canvas />
+    <button class="send-drawing-btn" onclick={sendDrawing}>Send Drawing</button>
   </div>
 
-  <div class="input-area">
-    {#if activeTab === 'draw'}
-      <div class="draw-area">
-        <Canvas />
-        <button class="send-btn" onclick={sendDrawing}>Send Drawing</button>
-      </div>
-    {:else if activeTab === 'text'}
-      <div class="text-area">
-        <textarea
-          bind:value={textContent}
-          oninput={handleTextInput}
-          onkeydown={handleTextKeydown}
-          onblur={stopTypingNow}
-          placeholder="Type a message... (Enter to send, Shift+Enter for newline)"
-          maxlength="2000"
-          rows="3"
-        ></textarea>
-        <div class="text-footer">
-          <span class="char-count">{textContent.length}/2000</span>
-          <button class="send-btn" onclick={sendText} disabled={!textContent.trim()}>Send</button>
-        </div>
-      </div>
-    {:else if activeTab === 'image'}
-      <div class="image-area">
-        {#if imagePreview}
-          <div class="image-preview-container">
-            <img src={imagePreview} alt="Preview" class="image-preview" />
-            <button class="clear-image-btn" onclick={clearImage}>Remove</button>
-          </div>
-        {:else}
-          <label class="file-label">
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/gif,image/webp"
-              onchange={handleFileChange}
-              class="file-input"
-            />
-            <span class="file-label-text">Choose an image</span>
-          </label>
-        {/if}
-        {#if uploadError}
-          <p class="error">{uploadError}</p>
-        {/if}
-        {#if imagePreview}
-          <button class="send-btn" onclick={sendImage} disabled={uploading}>
-            {uploading ? 'Uploading...' : 'Send Image'}
-          </button>
-        {/if}
-      </div>
-    {/if}
+  <!-- Text input bar -->
+  <div class="text-bar">
+    <button class="attach-btn" onclick={() => fileInputEl?.click()} title="Attach image">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+      </svg>
+    </button>
+    <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" onchange={handleFileChange} bind:this={fileInputEl} class="file-input" />
+    <textarea
+      class="text-input"
+      bind:value={textContent}
+      oninput={handleTextInput}
+      onkeydown={handleTextKeydown}
+      onblur={stopTypingNow}
+      placeholder="Type a message... (Shift+Enter for newline)"
+      maxlength="2000"
+      rows="1"
+    ></textarea>
+    <button class="send-text-btn" onclick={sendText} disabled={!textContent.trim()} title="Send message">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+      </svg>
+    </button>
   </div>
+
+  <!-- Image preview bar (only when image selected) -->
+  {#if imagePreview}
+    <div class="image-bar">
+      <img src={imagePreview} alt="Preview" class="image-thumb" />
+      <span class="image-name">{imageFile?.name}</span>
+      <button class="image-remove" onclick={clearImage} title="Remove image">&times;</button>
+      <button class="image-send-btn" onclick={sendImage} disabled={uploading}>
+        {uploading ? 'Uploading...' : 'Send Image'}
+      </button>
+      {#if uploadError}
+        <span class="error">{uploadError}</span>
+      {/if}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -176,157 +163,167 @@
     background: #16213e;
   }
 
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid #2a2a4e;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    background: transparent;
-    color: #888;
-    font-size: 13px;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  .tab:hover {
-    color: #ccc;
-  }
-
-  .tab.active {
-    color: #7eb8da;
-    border-bottom-color: #7eb8da;
-  }
-
-  .input-area {
-    padding: 8px;
-  }
-
   .draw-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-  }
-
-  .text-area {
-    display: flex;
-    flex-direction: column;
     gap: 6px;
+    padding: 8px;
   }
 
-  textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #334;
-    border-radius: 6px;
-    background: #1a1a2e;
-    color: #eee;
-    font-family: inherit;
-    font-size: 14px;
-    resize: vertical;
-    min-height: 60px;
-    outline: none;
-  }
-
-  textarea:focus {
-    border-color: #7eb8da;
-  }
-
-  textarea::placeholder {
-    color: #555;
-  }
-
-  .text-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .char-count {
-    font-size: 11px;
-    color: #666;
-  }
-
-  .image-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .file-input {
-    display: none;
-  }
-
-  .file-label {
-    cursor: pointer;
-  }
-
-  .file-label-text {
-    display: inline-block;
-    padding: 12px 24px;
-    border: 2px dashed #334;
-    border-radius: 8px;
-    color: #888;
-    font-size: 14px;
-    transition: border-color 0.15s, color 0.15s;
-  }
-
-  .file-label-text:hover {
-    border-color: #7eb8da;
-    color: #7eb8da;
-  }
-
-  .image-preview-container {
-    position: relative;
-    display: inline-block;
-  }
-
-  .image-preview {
-    max-width: 300px;
-    max-height: 200px;
-    border-radius: 4px;
-    display: block;
-  }
-
-  .clear-image-btn {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    padding: 2px 8px;
-    border: none;
-    border-radius: 3px;
-    background: rgba(0, 0, 0, 0.7);
-    color: #eee;
-    font-size: 11px;
-    cursor: pointer;
-  }
-
-  .clear-image-btn:hover {
-    background: rgba(200, 50, 50, 0.8);
-  }
-
-  .send-btn {
-    padding: 8px 20px;
+  .send-drawing-btn {
+    padding: 6px 16px;
     border: none;
     border-radius: 4px;
     background: #2a5a8a;
     color: #eee;
     font-size: 13px;
     cursor: pointer;
-    transition: background 0.15s;
   }
 
-  .send-btn:hover:not(:disabled) {
+  .send-drawing-btn:hover {
     background: #3a7aba;
   }
 
-  .send-btn:disabled {
+  .text-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-top: 1px solid #2a2a4e;
+  }
+
+  .attach-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .attach-btn:hover {
+    background: #2a2a4e;
+    color: #7eb8da;
+  }
+
+  .file-input {
+    display: none;
+  }
+
+  .text-input {
+    flex: 1;
+    padding: 7px 14px;
+    border: 1px solid #334;
+    border-radius: 16px;
+    background: #1a1a2e;
+    color: #eee;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    min-width: 0;
+    resize: none;
+    overflow-y: auto;
+    max-height: 80px;
+    line-height: 1.4;
+    field-sizing: content;
+  }
+
+  .text-input:focus {
+    border-color: #7eb8da;
+  }
+
+  .text-input::placeholder {
+    color: #555;
+  }
+
+  .send-text-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #2a5a8a;
+    color: #eee;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .send-text-btn:hover:not(:disabled) {
+    background: #3a7aba;
+  }
+
+  .send-text-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .image-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-top: 1px solid #2a2a4e;
+    background: #1a1a2e;
+  }
+
+  .image-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .image-name {
+    font-size: 12px;
+    color: #aaa;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .image-remove {
+    padding: 2px 8px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: #e55;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .image-remove:hover {
+    background: rgba(200, 50, 50, 0.2);
+  }
+
+  .image-send-btn {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 4px;
+    background: #2a5a8a;
+    color: #eee;
+    font-size: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .image-send-btn:hover:not(:disabled) {
+    background: #3a7aba;
+  }
+
+  .image-send-btn:disabled {
     opacity: 0.4;
     cursor: default;
   }
