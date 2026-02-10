@@ -5,7 +5,9 @@ export default defineConfig({
   plugins: [sveltekit()],
   server: {
     proxy: {
-      '/api': 'http://localhost:3001'
+      '/api': 'http://localhost:3001',
+      '/socket.io': { target: 'http://localhost:3001', ws: true },
+      '/uploads': 'http://localhost:3001'
     }
   }
 });

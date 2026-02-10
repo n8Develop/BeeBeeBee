@@ -57,3 +57,54 @@ export const deleteResetTokensByUser = db.prepare(
 export const checkEmailTaken = db.prepare(
   'SELECT id FROM users WHERE email = ? AND id != ?'
 );
+
+// Room queries
+export const createRoom = db.prepare(
+  'INSERT INTO rooms (id, name, owner_id, password_hash, invite_code) VALUES (?, ?, ?, ?, ?)'
+);
+
+export const findRoomById = db.prepare(
+  'SELECT * FROM rooms WHERE id = ?'
+);
+
+export const findRoomByInviteCode = db.prepare(
+  'SELECT * FROM rooms WHERE invite_code = ?'
+);
+
+export const deleteRoom = db.prepare(
+  'DELETE FROM rooms WHERE id = ?'
+);
+
+export const addRoomMember = db.prepare(
+  'INSERT OR IGNORE INTO room_members (room_id, user_id) VALUES (?, ?)'
+);
+
+export const removeRoomMember = db.prepare(
+  'DELETE FROM room_members WHERE room_id = ? AND user_id = ?'
+);
+
+export const isRoomMember = db.prepare(
+  'SELECT 1 FROM room_members WHERE room_id = ? AND user_id = ?'
+);
+
+export const getRoomMembers = db.prepare(
+  `SELECT u.id, u.username, rm.joined_at
+   FROM room_members rm
+   JOIN users u ON u.id = rm.user_id
+   WHERE rm.room_id = ?`
+);
+
+export const getRoomMemberCount = db.prepare(
+  'SELECT COUNT(*) as count FROM room_members WHERE room_id = ?'
+);
+
+export const getUserRooms = db.prepare(
+  `SELECT r.*, rm.joined_at
+   FROM rooms r
+   JOIN room_members rm ON rm.room_id = r.id
+   WHERE rm.user_id = ?`
+);
+
+export const getUserRoomCount = db.prepare(
+  'SELECT COUNT(*) as count FROM room_members WHERE user_id = ?'
+);

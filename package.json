@@ -15,12 +15,18 @@
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
     "concurrently": "^9.2.1",
+    "cookie": "^1.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
+    "ioredis": "^5.9.2",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
+    "nanoid": "^5.1.6",
     "resend": "^6.9.1",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "svelte": "^5.50.0",
     "vite": "^7.3.1"
   }
