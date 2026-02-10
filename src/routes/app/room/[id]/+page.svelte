@@ -4,6 +4,7 @@
   import { auth } from '$lib/auth.svelte.js';
   import { socket } from '$lib/socket.svelte.js';
   import { api } from '$lib/api.js';
+  import Avatar from '$lib/social/Avatar.svelte';
   import ChatFeed from '$lib/chat/ChatFeed.svelte';
   import MessageInput from '$lib/chat/MessageInput.svelte';
   import TypingIndicator from '$lib/chat/TypingIndicator.svelte';
@@ -104,6 +105,7 @@
         <ul class="members-list">
           {#each socket.members as member (member.userId)}
             <li class="member" class:online={member.online}>
+              <Avatar username={member.username} avatarUrl={member.avatarUrl} size={32} />
               <span class="status-dot" class:online={member.online}></span>
               <span class="member-name">{member.username}</span>
             </li>

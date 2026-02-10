@@ -45,3 +45,22 @@ CREATE TABLE IF NOT EXISTS room_members (
   FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS friendships (
+  user_id INTEGER NOT NULL,
+  friend_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, friend_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user_settings (
+  user_id INTEGER PRIMARY KEY,
+  input_volume REAL NOT NULL DEFAULT 1.0,
+  send_volume REAL NOT NULL DEFAULT 1.0,
+  notification_volume REAL NOT NULL DEFAULT 1.0,
+  master_volume REAL NOT NULL DEFAULT 1.0,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

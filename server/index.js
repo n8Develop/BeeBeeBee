@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.js';
 import emailRoutes from './routes/email.js';
 import roomRoutes from './routes/rooms.js';
 import uploadRoutes from './routes/upload.js';
+import friendsRoutes from './routes/friends.js';
+import settingsRoutes from './routes/settings.js';
 import { initSocket } from './socket/index.js';
 import { startCleanupInterval } from './uploads/cleanup.js';
 
@@ -30,6 +32,8 @@ app.use('/api/email', emailRoutes);
 
 app.use('/api/rooms', roomRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/friends', friendsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 startCleanupInterval();
 

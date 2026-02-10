@@ -16,4 +16,8 @@ db.pragma('foreign_keys = ON');
 const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Phase 4: add 'type' column to rooms, 'avatar_url' to users
+try { db.exec("ALTER TABLE rooms ADD COLUMN type TEXT NOT NULL DEFAULT 'invite'"); } catch {}
+try { db.exec("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT NULL"); } catch {}
+
 export default db;

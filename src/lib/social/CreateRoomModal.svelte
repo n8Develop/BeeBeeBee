@@ -5,6 +5,7 @@
 
   let name = $state('');
   let password = $state('');
+  let roomType = $state('invite');
   let loading = $state(false);
   let error = $state(null);
 
@@ -16,7 +17,7 @@
     error = null;
 
     try {
-      const body = { name: name.trim() };
+      const body = { name: name.trim(), type: roomType };
       if (password.trim()) {
         body.password = password.trim();
       }
@@ -56,6 +57,20 @@
           autofocus
         />
       </label>
+
+      <div class="field">
+        <span class="label">Room Type</span>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" bind:group={roomType} value="invite" />
+            <span>Invite Only</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" bind:group={roomType} value="named" />
+            <span>Named <span class="optional">(findable by search)</span></span>
+          </label>
+        </div>
+      </div>
 
       <label class="field">
         <span class="label">Password <span class="optional">(optional)</span></span>
@@ -222,5 +237,24 @@
   .submit-btn:disabled {
     opacity: 0.4;
     cursor: default;
+  }
+
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #eee;
+    cursor: pointer;
+  }
+
+  .radio-option input[type="radio"] {
+    accent-color: #7eb8da;
   }
 </style>

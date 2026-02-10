@@ -1,5 +1,6 @@
 <script>
   import { socket } from '$lib/socket.svelte.js';
+  import Avatar from '$lib/social/Avatar.svelte';
   import DrawingMessage from './DrawingMessage.svelte';
   import TextMessage from './TextMessage.svelte';
   import ImageMessage from './ImageMessage.svelte';
@@ -22,6 +23,7 @@
 
 <div class="message-bubble" class:own={isOwn}>
   <div class="header">
+    <Avatar username={message.username} avatarUrl={message.avatarUrl} size={32} />
     <span class="username">{message.username}</span>
     <span class="time">{formattedTime}</span>
     {#if isOwn}

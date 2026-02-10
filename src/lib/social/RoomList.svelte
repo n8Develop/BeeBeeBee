@@ -69,7 +69,14 @@
       {#each rooms as room (room.id)}
         <button class="room-card" onclick={() => handleRoomClick(room.id)}>
           <div class="room-info">
-            <span class="room-name">{room.name}</span>
+            <div class="room-name-row">
+              <span class="room-name">{room.name}</span>
+              {#if room.type === 'direct'}
+                <span class="room-badge dm">DM</span>
+              {:else if room.type === 'named'}
+                <span class="room-badge named">Named</span>
+              {/if}
+            </div>
             {#if room.memberCount != null}
               <span class="room-members">{room.memberCount} member{room.memberCount === 1 ? '' : 's'}</span>
             {/if}
@@ -219,5 +226,30 @@
     color: #7eb8da;
     font-family: monospace;
     font-size: 12px;
+  }
+
+  .room-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .room-badge {
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .room-badge.dm {
+    background: #2a3a5a;
+    color: #7eb8da;
+  }
+
+  .room-badge.named {
+    background: #2a4a3a;
+    color: #4ade80;
   }
 </style>

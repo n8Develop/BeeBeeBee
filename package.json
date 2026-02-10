@@ -25,6 +25,7 @@
     "multer": "^2.0.2",
     "nanoid": "^5.1.6",
     "resend": "^6.9.1",
+    "sharp": "^0.34.5",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "svelte": "^5.50.0",

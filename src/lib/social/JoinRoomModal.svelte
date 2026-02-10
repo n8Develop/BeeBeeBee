@@ -1,8 +1,10 @@
 <script>
   import { api } from '$lib/api.js';
+  import BrowseRooms from './BrowseRooms.svelte';
 
   let { onClose, onJoined } = $props();
 
+  let activeTab = $state('code');
   let inviteCode = $state('');
   let password = $state('');
   let loading = $state(false);
@@ -50,40 +52,49 @@
       <button class="close-btn" onclick={onClose}>x</button>
     </div>
 
-    <form onsubmit={handleSubmit}>
-      <label class="field">
-        <span class="label">Invite Code</span>
-        <input
-          type="text"
-          bind:value={inviteCode}
-          placeholder="Enter invite code"
-          required
-          autofocus
-        />
-      </label>
+    <div class="tabs">
+      <button class="tab" class:active={activeTab === 'code'} onclick={() => { activeTab = 'code'; }}>Invite Code</button>
+      <button class="tab" class:active={activeTab === 'browse'} onclick={() => { activeTab = 'browse'; }}>Browse</button>
+    </div>
 
-      {#if needsPassword}
+    {#if activeTab === 'code'}
+      <form onsubmit={handleSubmit}>
         <label class="field">
-          <span class="label">Password</span>
+          <span class="label">Invite Code</span>
           <input
-            type="password"
-            bind:value={password}
-            placeholder="Enter room password"
+            type="text"
+            bind:value={inviteCode}
+            placeholder="Enter invite code"
+            required
+            autofocus
           />
         </label>
-      {/if}
 
-      {#if error}
-        <p class="error">{error}</p>
-      {/if}
+        {#if needsPassword}
+          <label class="field">
+            <span class="label">Password</span>
+            <input
+              type="password"
+              bind:value={password}
+              placeholder="Enter room password"
+            />
+          </label>
+        {/if}
 
-      <div class="actions">
-        <button type="button" class="cancel-btn" onclick={onClose}>Cancel</button>
-        <button type="submit" class="submit-btn" disabled={loading || !inviteCode.trim()}>
-          {loading ? 'Joining...' : 'Join'}
-        </button>
-      </div>
-    </form>
+        {#if error}
+          <p class="error">{error}</p>
+        {/if}
+
+        <div class="actions">
+          <button type="button" class="cancel-btn" onclick={onClose}>Cancel</button>
+          <button type="submit" class="submit-btn" disabled={loading || !inviteCode.trim()}>
+            {loading ? 'Joining...' : 'Join'}
+          </button>
+        </div>
+      </form>
+    {:else}
+      <BrowseRooms onJoined={onJoined} />
+    {/if}
   </div>
 </div>
 
@@ -109,13 +120,15 @@
     width: 90%;
     max-width: 400px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    max-height: 80vh;
+    overflow-y: auto;
   }
 
   .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
   h3 {
@@ -141,6 +154,34 @@
   .close-btn:hover {
     background: #2a2a4e;
     color: #eee;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #334;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: #888;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .tab.active {
+    color: #7eb8da;
+    border-bottom-color: #7eb8da;
+  }
+
+  .tab:hover:not(.active) {
+    color: #aaa;
   }
 
   form {

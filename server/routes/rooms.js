@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { requireAuth } from '../middleware/auth.js';
 import {
   createRoom,
+  createRoomWithType,
   findRoomById,
   findRoomByInviteCode,
   deleteRoom,
@@ -13,19 +14,37 @@ import {
   getRoomMembers,
   getRoomMemberCount,
   getUserRooms,
-  getUserRoomCount
+  getUserRoomCount,
+  searchNamedRooms,
+  findDirectRoom,
+  getFriendship,
+  findUserById,
 } from '../db/queries.js';
 
 const router = Router();
 
 function sanitizeRoom(room) {
-  const { password_hash, ...rest } = room;
-  return rest;
+  const { password_hash, member_count, invite_code, owner_id, max_members, created_at, ...rest } = room;
+  const result = {
+    ...rest,
+    inviteCode: invite_code,
+    ownerId: owner_id,
+    maxMembers: max_members,
+    createdAt: created_at,
+    hasPassword: !!password_hash,
+  };
+  if (member_count != null) result.memberCount = member_count;
+  return result;
 }
 
 // POST /api/rooms — Create a room
 router.post('/', requireAuth, (req, res) => {
-  const { name, password } = req.body;
+  const { name, password, type } = req.body;
+  const roomType = type || 'invite';
+
+  if (!['invite', 'named', 'direct'].includes(roomType)) {
+    return res.status(400).json({ error: 'Invalid room type' });
+  }
 
   if (!name || typeof name !== 'string' || name.trim().length < 1 || name.trim().length > 50) {
     return res.status(400).json({ error: 'Room name must be 1-50 characters' });
@@ -41,13 +60,68 @@ router.post('/', requireAuth, (req, res) => {
     const invite_code = nanoid(10);
     const password_hash = password ? bcrypt.hashSync(password, 10) : null;
 
-    createRoom.run(id, name.trim(), req.user.id, password_hash, invite_code);
+    if (roomType === 'named') {
+      createRoomWithType.run(id, name.trim(), req.user.id, password_hash, invite_code, 16, 'named');
+    } else {
+      createRoom.run(id, name.trim(), req.user.id, password_hash, invite_code);
+    }
+
     addRoomMember.run(id, req.user.id);
 
     const room = findRoomById.get(id);
     res.status(201).json(sanitizeRoom(room));
   } catch (err) {
     return res.status(500).json({ error: 'Failed to create room' });
+  }
+});
+
+// GET /api/rooms/browse — Search named rooms
+router.get('/browse', requireAuth, (req, res) => {
+  const q = req.query.q || '';
+  try {
+    const rooms = searchNamedRooms.all(`%${q}%`);
+    res.json(rooms.map(sanitizeRoom));
+  } catch {
+    return res.status(500).json({ error: 'Failed to search rooms' });
+  }
+});
+
+// POST /api/rooms/direct — Create or find a direct message room
+router.post('/direct', requireAuth, (req, res) => {
+  const { friendId } = req.body;
+  if (!friendId) return res.status(400).json({ error: 'friendId is required' });
+
+  // Check friendship exists (either direction must be accepted)
+  const friendship = getFriendship.get(req.user.id, friendId);
+  const reverseFriendship = getFriendship.get(friendId, req.user.id);
+  const isFriend = (friendship && friendship.status === 'accepted') ||
+                   (reverseFriendship && reverseFriendship.status === 'accepted');
+
+  if (!isFriend) {
+    return res.status(403).json({ error: 'You can only create direct rooms with friends' });
+  }
+
+  try {
+    // Check if a direct room already exists
+    const existing = findDirectRoom.get(req.user.id, friendId);
+    if (existing) {
+      const room = findRoomById.get(existing.id);
+      return res.json(sanitizeRoom(room));
+    }
+
+    const friendUser = findUserById.get(friendId);
+    const roomName = `${req.user.username} & ${friendUser ? friendUser.username : 'Unknown'}`;
+
+    const id = nanoid();
+    const invite_code = nanoid(10);
+    createRoomWithType.run(id, roomName, req.user.id, null, invite_code, 2, 'direct');
+    addRoomMember.run(id, req.user.id);
+    addRoomMember.run(id, friendId);
+
+    const room = findRoomById.get(id);
+    res.status(201).json(sanitizeRoom(room));
+  } catch {
+    return res.status(500).json({ error: 'Failed to create direct room' });
   }
 });
 

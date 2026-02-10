@@ -28,7 +28,8 @@ function sanitizeUser(user) {
     id: user.id,
     username: user.username,
     email: user.email || null,
-    emailVerified: !!user.email_verified
+    emailVerified: !!user.email_verified,
+    avatarUrl: user.avatar_url || null,
   };
 }
 

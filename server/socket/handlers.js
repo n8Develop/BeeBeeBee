@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import { unlinkSync } from 'fs';
 import { isRoomMember, getRoomMembers, findRoomById } from '../db/queries.js';
+import { isBlockedBetween } from '../redis/presence.js';
 import {
   storeMessage,
   getMessage,
@@ -178,8 +179,13 @@ export function registerHandlers(io, socket) {
 
     await storeMessage(roomId, message);
 
-    // Broadcast to entire room (including sender)
-    io.to(roomId).emit('message:new', message);
+    // Deliver to each socket in the room, filtering blocked pairs
+    const sockets = await io.in(roomId).fetchSockets();
+    for (const s of sockets) {
+      if (!(await isBlockedBetween(socket.user.id, s.user.id))) {
+        s.emit('message:new', message);
+      }
+    }
   });
 
   socket.on('message:delete', async ({ roomId, messageId }) => {

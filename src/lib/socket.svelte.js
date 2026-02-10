@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { friendsStore } from './friends.svelte.js';
 
 function createSocket() {
   let socket = $state(null);
@@ -79,6 +80,22 @@ function createSocket() {
       if (data.roomId === currentRoomId) {
         typingUsers = data.users || [];
       }
+    });
+
+    sock.on('friend:online', (data) => {
+      friendsStore.handleFriendOnline(data);
+    });
+
+    sock.on('friend:offline', (data) => {
+      friendsStore.handleFriendOffline(data);
+    });
+
+    sock.on('friend:request-received', (data) => {
+      friendsStore.handleRequestReceived(data);
+    });
+
+    sock.on('friend:request-accepted', (data) => {
+      friendsStore.handleRequestAccepted(data);
     });
 
     sock.on('error', (data) => {
