@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { auth } from '$lib/auth.js';
+  import { auth } from '$lib/auth.svelte.js';
 
   onMount(() => {
     const unwatch = $effect.root(() => {

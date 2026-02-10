@@ -1,5 +1,6 @@
 <script>
-  import { auth } from '$lib/auth.js';
+  import { auth } from '$lib/auth.svelte.js';
+  import Canvas from '$lib/canvas/Canvas.svelte';
 
   async function handleLogout() {
     await auth.logout();
@@ -7,9 +8,10 @@
 </script>
 
 <div class="page">
-  <h1>Welcome to BeeBeeBee</h1>
+  <h1>BeeBeeBee</h1>
   {#if auth.user}
     <p>Logged in as <strong>{auth.user.username}</strong></p>
+    <Canvas />
     <button onclick={handleLogout}>Log out</button>
   {/if}
 </div>
