@@ -17,11 +17,12 @@
   let inviteCode = $state('');
   let codeCopied = $state(false);
   let roomError = $state(null);
+  let loading = $state(true);
   let showMembers = $state(false);
   let showFriends = $state(false);
 
   onMount(() => {
-    socket.connect();
+    socket.connect(auth.user?.id);
     socket.joinRoom(roomId);
     fetchRoomDetails();
 
@@ -37,6 +38,8 @@
       inviteCode = room.inviteCode || '';
     } catch (err) {
       roomError = err.message;
+    } finally {
+      loading = false;
     }
   }
 
@@ -100,6 +103,12 @@
     </div>
   </header>
 
+  {#if socket.reconnecting}
+    <div class="reconnecting-banner">
+      Connection lost. Reconnecting...
+    </div>
+  {/if}
+
   {#if roomError}
     <div class="error-banner">
       <p>{roomError}</p>
@@ -133,13 +142,20 @@
 
     <!-- Chat area -->
     <div class="chat-area">
-      <ChatFeed
-        messages={socket.messages}
-        currentUserId={auth.user?.id}
-        {roomId}
-      />
-      <TypingIndicator users={filteredTypingUsers} />
-      <MessageInput {roomId} />
+      {#if loading}
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <span>Loading room...</span>
+        </div>
+      {:else}
+        <ChatFeed
+          messages={socket.messages}
+          currentUserId={auth.user?.id}
+          {roomId}
+        />
+        <TypingIndicator users={filteredTypingUsers} />
+        <MessageInput {roomId} />
+      {/if}
     </div>
 
     <!-- Friends sidebar (right, toggleable) -->
@@ -284,6 +300,16 @@
     background: #6a3a3a;
   }
 
+  .reconnecting-banner {
+    padding: 8px 16px;
+    background: #3a2a0a;
+    border-bottom: 1px solid #665520;
+    color: #fbbf24;
+    font-size: 13px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
   .error-banner {
     display: flex;
     align-items: center;
@@ -378,11 +404,54 @@
     min-height: 0;
   }
 
+  .loading-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #888;
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #334;
+    border-top-color: #7eb8da;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
   .friends-sidebar {
     width: 220px;
     border-left: 1px solid #334;
     background: #12192e;
     overflow-y: auto;
     flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    .room-header {
+      padding: 8px 10px;
+      gap: 8px;
+    }
+
+    .invite-code {
+      display: none;
+    }
+
+    .members-sidebar {
+      width: 150px;
+    }
+
+    .friends-sidebar {
+      width: 180px;
+    }
   }
 </style>

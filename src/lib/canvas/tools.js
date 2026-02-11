@@ -7,6 +7,11 @@ import { shouldAddPoint } from './smoothing.js';
 import { floodFill } from './flood-fill.js';
 import { stamps } from './stamps.js';
 import * as sounds from './sounds.js';
+import { settings } from '../settings.svelte.js';
+
+function inputVol() {
+  return settings.inputVolume * settings.masterVolume;
+}
 
 function getCanvasPos(canvas, e) {
   const rect = canvas.getBoundingClientRect();
@@ -30,7 +35,7 @@ function createStrokeTool(eraser = false) {
       active = true;
       canvasState.drawing = true;
       if (canvasState.soundEnabled) {
-        sounds.penDown();
+        sounds.penDown(inputVol());
         sounds.resetMoveTracking();
       }
     },
@@ -43,7 +48,7 @@ function createStrokeTool(eraser = false) {
 
       points.push(pos);
 
-      if (canvasState.soundEnabled) sounds.moveTick(pos.x, pos.y);
+      if (canvasState.soundEnabled) sounds.moveTick(pos.x, pos.y, inputVol());
 
       // Redraw committed ops + live stroke
       replayOperations(ctx, canvasState.operations);
@@ -164,7 +169,7 @@ export function commitText(x, y, content, color, fontSize) {
 export const stampTool = {
   onPointerDown(ctx, e) {
     const pos = getCanvasPos(ctx.canvas, e);
-    if (canvasState.soundEnabled) sounds.stampPlace();
+    if (canvasState.soundEnabled) sounds.stampPlace(inputVol());
 
     canvasState.commit({
       type: 'stamp',

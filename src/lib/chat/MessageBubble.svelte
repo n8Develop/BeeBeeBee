@@ -109,5 +109,6 @@
 
   .content {
     min-width: 0;
+    overflow: hidden;
   }
 </style>

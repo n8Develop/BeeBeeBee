@@ -4,12 +4,21 @@
   let { messages = [], currentUserId, roomId } = $props();
 
   let feedEl = $state(null);
+  let wasNearBottom = true;
 
-  // Auto-scroll to bottom when messages change
+  function isNearBottom() {
+    if (!feedEl) return true;
+    return feedEl.scrollHeight - feedEl.scrollTop - feedEl.clientHeight < 80;
+  }
+
+  function handleScroll() {
+    wasNearBottom = isNearBottom();
+  }
+
+  // Auto-scroll only if user was already near the bottom
   $effect(() => {
     const _ = messages.length;
-    if (feedEl) {
-      // Use a microtask to ensure DOM has updated
+    if (feedEl && wasNearBottom) {
       queueMicrotask(() => {
         feedEl.scrollTop = feedEl.scrollHeight;
       });
@@ -17,7 +26,7 @@
   });
 </script>
 
-<div class="chat-feed" bind:this={feedEl}>
+<div class="chat-feed" bind:this={feedEl} onscroll={handleScroll}>
   {#if messages.length === 0}
     <div class="empty">No messages yet. Start the conversation!</div>
   {:else}

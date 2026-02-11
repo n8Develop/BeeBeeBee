@@ -1,6 +1,8 @@
 <script>
   import { socket } from '$lib/socket.svelte.js';
+  import { settings } from '$lib/settings.svelte.js';
   import { canvasState } from '$lib/canvas/state.svelte.js';
+  import { messageSent } from '$lib/canvas/sounds.js';
   import Canvas from '$lib/canvas/Canvas.svelte';
 
   let { roomId } = $props();
@@ -15,6 +17,11 @@
   // Typing indicator state
   let isTyping = $state(false);
   let typingTimeout = null;
+
+  function playSendSound() {
+    const vol = settings.sendVolume * settings.masterVolume;
+    if (vol > 0) messageSent(vol);
+  }
 
   function handleTextInput() {
     if (!isTyping) {
@@ -41,6 +48,7 @@
     if (data.operations.length === 0) return;
     socket.sendMessage(roomId, 'drawing', data);
     canvasState.reset();
+    playSendSound();
   }
 
   function sendText() {
@@ -50,6 +58,7 @@
     socket.sendMessage(roomId, 'text', trimmed);
     textContent = '';
     stopTypingNow();
+    playSendSound();
   }
 
   function handleTextKeydown(e) {
@@ -94,6 +103,7 @@
 
       socket.sendMessage(roomId, 'image', data.url);
       clearImage();
+      playSendSound();
     } catch (err) {
       uploadError = err.message;
     } finally {
@@ -107,18 +117,24 @@
     uploadError = null;
     if (fileInputEl) fileInputEl.value = '';
   }
+
+  let inputDisabled = $derived(!socket.connected);
 </script>
 
 <div class="message-input">
+  {#if socket.sendError}
+    <div class="send-error">{socket.sendError}</div>
+  {/if}
+
   <!-- Canvas always visible -->
   <div class="draw-area">
     <Canvas />
-    <button class="send-drawing-btn" onclick={sendDrawing}>Send Drawing</button>
+    <button class="send-drawing-btn" onclick={sendDrawing} disabled={inputDisabled}>Send Drawing</button>
   </div>
 
   <!-- Text input bar -->
   <div class="text-bar">
-    <button class="attach-btn" onclick={() => fileInputEl?.click()} title="Attach image">
+    <button class="attach-btn" onclick={() => fileInputEl?.click()} title="Attach image" disabled={inputDisabled}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
       </svg>
@@ -130,11 +146,12 @@
       oninput={handleTextInput}
       onkeydown={handleTextKeydown}
       onblur={stopTypingNow}
-      placeholder="Type a message... (Shift+Enter for newline)"
+      placeholder={inputDisabled ? 'Disconnected...' : 'Type a message... (Shift+Enter for newline)'}
       maxlength="2000"
       rows="1"
+      disabled={inputDisabled}
     ></textarea>
-    <button class="send-text-btn" onclick={sendText} disabled={!textContent.trim()} title="Send message">
+    <button class="send-text-btn" onclick={sendText} disabled={!textContent.trim() || inputDisabled} title="Send message">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
       </svg>
@@ -147,7 +164,7 @@
       <img src={imagePreview} alt="Preview" class="image-thumb" />
       <span class="image-name">{imageFile?.name}</span>
       <button class="image-remove" onclick={clearImage} title="Remove image">&times;</button>
-      <button class="image-send-btn" onclick={sendImage} disabled={uploading}>
+      <button class="image-send-btn" onclick={sendImage} disabled={uploading || inputDisabled}>
         {uploading ? 'Uploading...' : 'Send Image'}
       </button>
       {#if uploadError}
@@ -161,6 +178,15 @@
   .message-input {
     border-top: 1px solid #334;
     background: #16213e;
+  }
+
+  .send-error {
+    padding: 6px 12px;
+    background: #3a1a1a;
+    color: #f87171;
+    font-size: 12px;
+    text-align: center;
+    border-bottom: 1px solid #543;
   }
 
   .draw-area {
@@ -181,8 +207,13 @@
     cursor: pointer;
   }
 
-  .send-drawing-btn:hover {
+  .send-drawing-btn:hover:not(:disabled) {
     background: #3a7aba;
+  }
+
+  .send-drawing-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 
   .text-bar {
@@ -207,9 +238,14 @@
     flex-shrink: 0;
   }
 
-  .attach-btn:hover {
+  .attach-btn:hover:not(:disabled) {
     background: #2a2a4e;
     color: #7eb8da;
+  }
+
+  .attach-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 
   .file-input {
@@ -240,6 +276,10 @@
 
   .text-input::placeholder {
     color: #555;
+  }
+
+  .text-input:disabled {
+    opacity: 0.5;
   }
 
   .send-text-btn {

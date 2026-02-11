@@ -7,13 +7,15 @@
     "dev": "concurrently -n fe,be -c cyan,yellow \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "vite dev",
     "dev:backend": "node --watch server/index.js",
-    "build": "vite build"
+    "build": "vite build",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.50.2",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
+    "compression": "^1.8.1",
     "concurrently": "^9.2.1",
     "cookie": "^1.1.1",
     "cookie-parser": "^1.4.7",

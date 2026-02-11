@@ -98,12 +98,44 @@ function renderFill(ctx, op) {
   floodFill(ctx, op.x, op.y, op.color);
 }
 
+/**
+ * Calculate wrapped lines for canvas text.
+ * Returns { lines, lastLineWidth } for cursor positioning.
+ */
+export function getTextWrapInfo(ctx, text, x, fontSize, canvasWidth) {
+  const maxWidth = canvasWidth - x - 4;
+  const lines = [];
+  let currentLine = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const testLine = currentLine + text[i];
+    if (ctx.measureText(testLine).width > maxWidth && currentLine.length > 0) {
+      lines.push(currentLine);
+      currentLine = text[i];
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+
+  const lastLine = lines[lines.length - 1] || '';
+  return { lines, lastLineWidth: ctx.measureText(lastLine).width };
+}
+
 function renderText(ctx, op) {
   ctx.save();
   ctx.fillStyle = op.color;
   ctx.font = `${op.fontSize}px system-ui, sans-serif`;
   ctx.textBaseline = 'top';
-  ctx.fillText(op.content, op.x, op.y);
+
+  const info = getTextWrapInfo(ctx, op.content, op.x, op.fontSize, ctx.canvas.width);
+  const lineHeight = op.fontSize + 4;
+  let y = op.y;
+  for (const line of info.lines) {
+    ctx.fillText(line, op.x, y);
+    y += lineHeight;
+  }
+
   ctx.restore();
 }
 

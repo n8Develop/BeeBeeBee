@@ -1,10 +1,11 @@
 <script>
   import { canvasState } from './state.svelte.js';
-  import { replayOperations } from './render.js';
+  import { replayOperations, getTextWrapInfo } from './render.js';
   import { getActiveTool, commitText } from './tools.js';
   import { palette } from './palette.js';
   import { stamps } from './stamps.js';
   import { initAudio, keyTick } from './sounds.js';
+  import { settings } from '../settings.svelte.js';
 
   const brushSizes = [2, 4, 8, 14, 22];
   const fontSizes = [12, 16, 20, 24];
@@ -38,6 +39,8 @@
   let textCursorVisible = $state(false);
   let cursorBlinkInterval = null;
   let textboxPlaced = false;
+
+  canvasState.onFlush = commitPendingText;
 
   $effect(() => {
     if (canvasEl && !initialized) {
@@ -99,19 +102,29 @@
   function drawTextPreview() {
     if (!ctx) return;
     const fontSize = canvasState.fontSize;
+    const lineHeight = fontSize + 4;
     ctx.save();
     ctx.font = `${fontSize}px system-ui, sans-serif`;
     ctx.textBaseline = 'top';
 
+    let cursorDrawX = textCursorX;
+    let cursorDrawY = textCursorY;
+
     if (textBuffer) {
       ctx.fillStyle = canvasState.color;
-      ctx.fillText(textBuffer, textCursorX, textCursorY);
+      const info = getTextWrapInfo(ctx, textBuffer, textCursorX, fontSize, 600);
+      let y = textCursorY;
+      for (const line of info.lines) {
+        ctx.fillText(line, textCursorX, y);
+        y += lineHeight;
+      }
+      cursorDrawX = textCursorX + info.lastLineWidth;
+      cursorDrawY = textCursorY + (info.lines.length - 1) * lineHeight;
     }
 
     if (textCursorVisible) {
-      const textWidth = textBuffer ? ctx.measureText(textBuffer).width : 0;
       ctx.fillStyle = canvasState.color;
-      ctx.fillRect(textCursorX + textWidth, textCursorY, 2, fontSize);
+      ctx.fillRect(cursorDrawX, cursorDrawY, 2, fontSize);
     }
 
     ctx.restore();
@@ -121,8 +134,12 @@
     if (textBuffer.trim()) {
       commitText(textCursorX, textCursorY, textBuffer, canvasState.color, canvasState.fontSize);
       if (ctx) {
-        ctx.font = `${canvasState.fontSize}px system-ui, sans-serif`;
-        textCursorX += ctx.measureText(textBuffer).width;
+        const fontSize = canvasState.fontSize;
+        const lineHeight = fontSize + 4;
+        ctx.font = `${fontSize}px system-ui, sans-serif`;
+        const info = getTextWrapInfo(ctx, textBuffer, textCursorX, fontSize, 600);
+        textCursorX = textCursorX + info.lastLineWidth;
+        textCursorY = textCursorY + (info.lines.length - 1) * lineHeight;
       }
     }
     textBuffer = '';
@@ -216,7 +233,7 @@
         navigator.clipboard.readText().then(text => {
           if (text) {
             textBuffer += text;
-            if (canvasState.soundEnabled) keyTick();
+            if (canvasState.soundEnabled) keyTick(settings.inputVolume * settings.masterVolume);
             startCursorBlink();
             replayOperations(ctx, canvasState.operations);
             drawTextPreview();
@@ -226,7 +243,7 @@
     } else if (e.key.length === 1) {
       e.preventDefault();
       textBuffer += e.key;
-      if (canvasState.soundEnabled) keyTick();
+      if (canvasState.soundEnabled) keyTick(settings.inputVolume * settings.masterVolume);
       startCursorBlink();
       replayOperations(ctx, canvasState.operations);
       drawTextPreview();
@@ -577,5 +594,28 @@
 
   .stamp-btn:hover {
     background: #2a2a4e;
+  }
+
+  @media (max-width: 700px) {
+    .canvas-container {
+      width: 100%;
+      padding: 4px;
+    }
+
+    .canvas-layout {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .options-panel {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: 600px;
+    }
+
+    .palette {
+      grid-template-columns: repeat(7, 1fr);
+    }
   }
 </style>

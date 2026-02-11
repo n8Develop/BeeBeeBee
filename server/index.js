@@ -1,5 +1,6 @@
 import express from 'express';
 import { createServer } from 'http';
+import compression from 'compression';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { config } from './config.js';
@@ -18,6 +19,13 @@ const server = createServer(app);
 
 initSocket(server);
 
+app.use(compression());
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 app.use(cors({ origin: config.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -34,6 +42,11 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/settings', settingsRoutes);
+
+if (config.NODE_ENV === 'production') {
+  app.use(express.static('build', { maxAge: '1y', immutable: true }));
+  app.get('*', (req, res) => res.sendFile('200.html', { root: 'build' }));
+}
 
 startCleanupInterval();
 

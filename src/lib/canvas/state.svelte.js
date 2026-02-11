@@ -10,6 +10,7 @@ function createCanvasState() {
   let redoStack = $state([]);
   let drawing = $state(false);
   let soundEnabled = $state(true);
+  let flushCallback = null;
 
   return {
     get tool() { return tool; },
@@ -64,7 +65,10 @@ function createCanvasState() {
       redoStack = [];
     },
 
+    set onFlush(fn) { flushCallback = fn; },
+
     exportOps() {
+      if (flushCallback) flushCallback();
       return { operations: [...operations], width: 600, height: 200 };
     },
 
