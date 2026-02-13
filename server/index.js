@@ -45,7 +45,7 @@ app.use('/api/settings', settingsRoutes);
 
 if (config.NODE_ENV === 'production') {
   app.use(express.static('build', { maxAge: '1y', immutable: true }));
-  app.get('*', (req, res) => res.sendFile('200.html', { root: 'build' }));
+  app.get('/{*path}', (req, res) => res.sendFile('200.html', { root: 'build' }));
 }
 
 startCleanupInterval();
