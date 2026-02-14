@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcryptjs';
 import { requireAuth } from '../middleware/auth.js';
+import db from '../db/index.js';
 import {
   createRoom,
   createRoomWithType,
@@ -102,24 +103,29 @@ router.post('/direct', requireAuth, (req, res) => {
   }
 
   try {
-    // Check if a direct room already exists
-    const existing = findDirectRoom.get(req.user.id, friendId);
-    if (existing) {
-      const room = findRoomById.get(existing.id);
-      return res.json(sanitizeRoom(room));
+    // Use a transaction to prevent duplicate direct rooms
+    const result = db.transaction(() => {
+      const existing = findDirectRoom.get(req.user.id, friendId);
+      if (existing) {
+        return { existing: true, room: findRoomById.get(existing.id) };
+      }
+
+      const friendUser = findUserById.get(friendId);
+      const roomName = `${req.user.username} & ${friendUser ? friendUser.username : 'Unknown'}`;
+
+      const id = nanoid();
+      const invite_code = nanoid(10);
+      createRoomWithType.run(id, roomName, req.user.id, null, invite_code, 2, 'direct');
+      addRoomMember.run(id, req.user.id);
+      addRoomMember.run(id, friendId);
+
+      return { existing: false, room: findRoomById.get(id) };
+    })();
+
+    if (result.existing) {
+      return res.json(sanitizeRoom(result.room));
     }
-
-    const friendUser = findUserById.get(friendId);
-    const roomName = `${req.user.username} & ${friendUser ? friendUser.username : 'Unknown'}`;
-
-    const id = nanoid();
-    const invite_code = nanoid(10);
-    createRoomWithType.run(id, roomName, req.user.id, null, invite_code, 2, 'direct');
-    addRoomMember.run(id, req.user.id);
-    addRoomMember.run(id, friendId);
-
-    const room = findRoomById.get(id);
-    res.status(201).json(sanitizeRoom(room));
+    res.status(201).json(sanitizeRoom(result.room));
   } catch {
     return res.status(500).json({ error: 'Failed to create direct room' });
   }
@@ -180,26 +186,26 @@ router.post('/:id/join', requireAuth, (req, res) => {
     const existing = isRoomMember.get(req.params.id, req.user.id);
     if (existing) return res.json(sanitizeRoom(room));
 
-    // Check room capacity
-    const count = getRoomMemberCount.get(req.params.id);
-    if (count.count >= room.max_members) {
-      return res.status(400).json({ error: 'This room is full' });
-    }
-
-    // Check user room limit
-    const userCount = getUserRoomCount.get(req.user.id);
-    if (userCount.count >= 20) {
-      return res.status(400).json({ error: 'You have reached the maximum of 20 rooms' });
-    }
-
-    // Check password
+    // Check password before transaction
     if (room.password_hash) {
       if (!password || !bcrypt.compareSync(password, room.password_hash)) {
         return res.status(403).json({ error: 'Incorrect room password' });
       }
     }
 
-    addRoomMember.run(req.params.id, req.user.id);
+    // Transaction for atomic capacity check + join
+    const result = db.transaction(() => {
+      const count = getRoomMemberCount.get(req.params.id);
+      if (count.count >= room.max_members) return { error: 'This room is full' };
+
+      const userCount = getUserRoomCount.get(req.user.id);
+      if (userCount.count >= 20) return { error: 'You have reached the maximum of 20 rooms' };
+
+      addRoomMember.run(req.params.id, req.user.id);
+      return null;
+    })();
+
+    if (result) return res.status(400).json(result);
     res.json(sanitizeRoom(room));
   } catch {
     return res.status(500).json({ error: 'Failed to join room' });
@@ -222,26 +228,26 @@ router.post('/join-by-code', requireAuth, (req, res) => {
     const existing = isRoomMember.get(room.id, req.user.id);
     if (existing) return res.json(sanitizeRoom(room));
 
-    // Check room capacity
-    const count = getRoomMemberCount.get(room.id);
-    if (count.count >= room.max_members) {
-      return res.status(400).json({ error: 'This room is full' });
-    }
-
-    // Check user room limit
-    const userCount = getUserRoomCount.get(req.user.id);
-    if (userCount.count >= 20) {
-      return res.status(400).json({ error: 'You have reached the maximum of 20 rooms' });
-    }
-
-    // Check password
+    // Check password before transaction
     if (room.password_hash) {
       if (!password || !bcrypt.compareSync(password, room.password_hash)) {
         return res.status(403).json({ error: 'Incorrect room password' });
       }
     }
 
-    addRoomMember.run(room.id, req.user.id);
+    // Transaction for atomic capacity check + join
+    const result = db.transaction(() => {
+      const count = getRoomMemberCount.get(room.id);
+      if (count.count >= room.max_members) return { error: 'This room is full' };
+
+      const userCount = getUserRoomCount.get(req.user.id);
+      if (userCount.count >= 20) return { error: 'You have reached the maximum of 20 rooms' };
+
+      addRoomMember.run(room.id, req.user.id);
+      return null;
+    })();
+
+    if (result) return res.status(400).json(result);
     res.json(sanitizeRoom(room));
   } catch {
     return res.status(500).json({ error: 'Failed to join room' });

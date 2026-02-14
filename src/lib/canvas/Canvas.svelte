@@ -1,4 +1,5 @@
 <script>
+  import { onDestroy } from 'svelte';
   import { canvasState } from './state.svelte.js';
   import { replayOperations, getTextWrapInfo } from './render.js';
   import { getActiveTool, commitText } from './tools.js';
@@ -41,6 +42,10 @@
   let textboxPlaced = false;
 
   canvasState.onFlush = commitPendingText;
+
+  onDestroy(() => {
+    stopCursorBlink();
+  });
 
   $effect(() => {
     if (canvasEl && !initialized) {
@@ -288,17 +293,17 @@
       </div>
       <div class="tool-divider"></div>
       <div class="tool-grid">
-        <button class="icon-btn" onclick={() => canvasState.undo()} disabled={canvasState.operations.length === 0} title="Undo">
+        <button class="icon-btn" onclick={() => canvasState.undo()} disabled={canvasState.operations.length === 0} title="Undo" aria-label="Undo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
           </svg>
         </button>
-        <button class="icon-btn" onclick={() => canvasState.redo()} disabled={canvasState.redoStack.length === 0} title="Redo">
+        <button class="icon-btn" onclick={() => canvasState.redo()} disabled={canvasState.redoStack.length === 0} title="Redo" aria-label="Redo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z" />
           </svg>
         </button>
-        <button class="icon-btn" onclick={() => canvasState.clear()} title="Clear">
+        <button class="icon-btn" onclick={() => canvasState.clear()} title="Clear" aria-label="Clear canvas">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
           </svg>
@@ -329,6 +334,7 @@
         width={600}
         height={200}
         style="touch-action: none;"
+        aria-label="Drawing canvas"
         onpointerdown={handlePointerDown}
         onpointermove={handlePointerMove}
         onpointerup={handlePointerUp}

@@ -38,11 +38,11 @@
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<div class="modal-backdrop" onclick={handleBackdropClick} role="dialog" aria-modal="true">
+<div class="modal-backdrop" onclick={handleBackdropClick} role="dialog" aria-modal="true" aria-labelledby="create-room-title">
   <div class="modal">
     <div class="modal-header">
-      <h3>Create Room</h3>
-      <button class="close-btn" onclick={onClose}>x</button>
+      <h3 id="create-room-title">Create Room</h3>
+      <button class="close-btn" onclick={onClose} aria-label="Close">x</button>
     </div>
 
     <form onsubmit={handleSubmit}>

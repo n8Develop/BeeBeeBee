@@ -27,7 +27,7 @@
     <span class="username">{message.username}</span>
     <span class="time">{formattedTime}</span>
     {#if isOwn}
-      <button class="delete-btn" onclick={handleDelete} title="Delete message">x</button>
+      <button class="delete-btn" onclick={handleDelete} title="Delete message" aria-label="Delete message">x</button>
     {/if}
   </div>
 

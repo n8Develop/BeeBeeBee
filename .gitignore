@@ -30,6 +30,13 @@ Thumbs.db
 # Tauri
 src-tauri/target/
 
+# Test artifacts
+cookies*.txt
+nul
+
+# Claude Code
+.claude/settings.local.json
+
 # Logs
 *.log
 npm-debug.log*

@@ -13,6 +13,7 @@ import friendsRoutes from './routes/friends.js';
 import settingsRoutes from './routes/settings.js';
 import { initSocket } from './socket/index.js';
 import { startCleanupInterval } from './uploads/cleanup.js';
+import { httpRateLimit } from './middleware/httpRateLimit.js';
 
 const app = express();
 const server = createServer(app);
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 app.use(cors({ origin: config.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(httpRateLimit);
 app.use('/uploads', express.static('uploads'));
 
 app.get('/api/health', (req, res) => {
@@ -44,8 +46,9 @@ app.use('/api/friends', friendsRoutes);
 app.use('/api/settings', settingsRoutes);
 
 if (config.NODE_ENV === 'production') {
-  app.use(express.static('build', { maxAge: '1y', immutable: true }));
-  app.get('/{*path}', (req, res) => res.sendFile('200.html', { root: 'build' }));
+  const buildDir = new URL('../build', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
+  app.use(express.static(buildDir, { maxAge: '1y', immutable: true }));
+  app.get('/{*path}', (req, res) => res.sendFile('200.html', { root: buildDir }));
 }
 
 startCleanupInterval();

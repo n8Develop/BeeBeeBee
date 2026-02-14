@@ -90,11 +90,15 @@
       const formData = new FormData();
       formData.append('image', imageFile);
 
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30_000);
       const res = await fetch('/api/upload', {
         method: 'POST',
         credentials: 'include',
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
+      clearTimeout(timeout);
 
       const data = await res.json().catch(() => null);
       if (!res.ok) {

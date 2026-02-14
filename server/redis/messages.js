@@ -11,6 +11,7 @@ export async function storeMessage(roomId, message) {
 
   await redis.set(key, JSON.stringify(message), 'EX', MSG_TTL);
   await redis.rpush(listKey, message.id);
+  await redis.expire(listKey, MSG_TTL);
 }
 
 /**
@@ -24,12 +25,17 @@ export async function getMessage(messageId) {
 /**
  * Update a message in Redis (preserving remaining TTL).
  */
+const UPDATE_SCRIPT = `
+local ttl = redis.call('TTL', KEYS[1])
+if ttl <= 0 then return 0 end
+redis.call('SET', KEYS[1], ARGV[1], 'EX', ttl)
+return 1
+`;
+
 export async function updateMessage(messageId, message) {
   const key = `bbb:msg:${messageId}`;
-  const ttl = await redis.ttl(key);
-  if (ttl <= 0) return false;
-  await redis.set(key, JSON.stringify(message), 'EX', ttl);
-  return true;
+  const result = await redis.eval(UPDATE_SCRIPT, 1, key, JSON.stringify(message));
+  return result === 1;
 }
 
 /**
@@ -70,7 +76,7 @@ export async function getRoomMessages(roomId) {
     for (const id of staleIds) {
       pipeline.lrem(listKey, 0, id);
     }
-    pipeline.exec();
+    await pipeline.exec();
   }
 
   return messages;
@@ -102,7 +108,9 @@ export async function getOnlineUsers(roomId) {
  * Set a user as typing in a room (stores current timestamp).
  */
 export async function setTyping(roomId, userId) {
-  await redis.hset(`bbb:room:${roomId}:typing`, String(userId), Date.now());
+  const key = `bbb:room:${roomId}:typing`;
+  await redis.hset(key, String(userId), Date.now());
+  await redis.expire(key, 30);
 }
 
 /**

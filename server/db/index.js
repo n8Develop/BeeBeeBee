@@ -17,7 +17,13 @@ const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
 // Phase 4: add 'type' column to rooms, 'avatar_url' to users
-try { db.exec("ALTER TABLE rooms ADD COLUMN type TEXT NOT NULL DEFAULT 'invite'"); } catch {}
-try { db.exec("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT NULL"); } catch {}
+const columns = db.prepare("PRAGMA table_info(rooms)").all().map(c => c.name);
+if (!columns.includes('type')) {
+  db.exec("ALTER TABLE rooms ADD COLUMN type TEXT NOT NULL DEFAULT 'invite'");
+}
+const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+if (!userCols.includes('avatar_url')) {
+  db.exec("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT NULL");
+}
 
 export default db;

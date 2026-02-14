@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
+import db from '../db/index.js';
 import {
   findUserByUsername,
   findUserById,
@@ -135,15 +136,15 @@ router.post('/block', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'You cannot block yourself' });
   }
 
-  // Delete both directions of any existing friendship
-  deleteFriendship.run(req.user.id, userId);
-  deleteFriendship.run(userId, req.user.id);
-
-  // Insert block
-  createFriendRequest.run(req.user.id, userId, 'blocked');
+  // Atomically delete friendships and insert block
+  const blocked = db.transaction(() => {
+    deleteFriendship.run(req.user.id, userId);
+    deleteFriendship.run(userId, req.user.id);
+    createFriendRequest.run(req.user.id, userId, 'blocked');
+    return getBlockedByUser.all(req.user.id).map((r) => r.friend_id);
+  })();
 
   // Update Redis block cache
-  const blocked = getBlockedByUser.all(req.user.id).map((r) => r.friend_id);
   await cacheBlockList(req.user.id, blocked);
 
   res.json({ ok: true });

@@ -18,8 +18,8 @@ function cleanupOldFiles() {
       if (now - stat.mtimeMs > MAX_AGE_MS) {
         fs.unlinkSync(filePath);
       }
-    } catch {
-      // file may have been deleted already
+    } catch (err) {
+      console.error(`Cleanup: failed to process ${file}:`, err.message);
     }
   }
 }

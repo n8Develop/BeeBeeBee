@@ -64,3 +64,13 @@ CREATE TABLE IF NOT EXISTS user_settings (
   master_volume REAL NOT NULL DEFAULT 1.0,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_token ON email_verification_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON password_reset_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_rooms_invite_code ON rooms(invite_code);
+CREATE INDEX IF NOT EXISTS idx_room_members_room_id ON room_members(room_id);
+CREATE INDEX IF NOT EXISTS idx_room_members_user_id ON room_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_user_id ON friendships(user_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_friend_id ON friendships(friend_id);

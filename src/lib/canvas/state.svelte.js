@@ -38,7 +38,12 @@ function createCanvasState() {
     set soundEnabled(v) { soundEnabled = v; },
 
     commit(op) {
-      operations = [...operations, op];
+      // Cap operations to prevent unbounded memory growth
+      if (operations.length >= 500) {
+        operations = [...operations.slice(-400), op];
+      } else {
+        operations = [...operations, op];
+      }
       redoStack = [];
     },
 

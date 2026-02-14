@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import { unlinkSync } from 'fs';
+import path from 'path';
 import { isRoomMember, getRoomMembers, findRoomById } from '../db/queries.js';
 import { isBlockedBetween } from '../redis/presence.js';
 import {
@@ -208,11 +209,13 @@ export function registerHandlers(io, socket) {
     // If image message, delete the file
     if (message.type === 'image' && typeof message.content === 'string') {
       try {
-        // Content is a URL like /uploads/messages/filename.ext
-        const filePath = message.content.replace(/^\//, '');
-        unlinkSync(filePath);
-      } catch {
-        // File may already be deleted, ignore
+        const uploadsDir = path.resolve('uploads/messages');
+        const filePath = path.resolve(message.content.replace(/^\//, ''));
+        if (filePath.startsWith(uploadsDir)) {
+          unlinkSync(filePath);
+        }
+      } catch (err) {
+        console.error(`Failed to delete image for message ${messageId}:`, err.message);
       }
     }
 
