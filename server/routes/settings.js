@@ -22,6 +22,7 @@ import { sendVerificationEmail } from '../email/index.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } });
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // PUT /api/settings/avatar — Upload avatar
 router.put('/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
@@ -56,7 +57,8 @@ router.put('/avatar', requireAuth, upload.single('avatar'), async (req, res) => 
     updateUserAvatar.run(avatarUrl, req.user.id);
 
     res.json({ avatarUrl });
-  } catch {
+  } catch (err) {
+    console.error(`Avatar upload failed for user ${req.user.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to process avatar' });
   }
 });
@@ -88,8 +90,8 @@ router.put('/password', requireAuth, (req, res) => {
 router.put('/email', requireAuth, async (req, res) => {
   const { email } = req.body;
 
-  if (!email || typeof email !== 'string') {
-    return res.status(400).json({ error: 'Email is required' });
+  if (!email || typeof email !== 'string' || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Valid email is required' });
   }
 
   const taken = checkEmailTaken.get(email, req.user.id);

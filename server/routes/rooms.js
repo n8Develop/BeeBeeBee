@@ -72,6 +72,7 @@ router.post('/', requireAuth, (req, res) => {
     const room = findRoomById.get(id);
     res.status(201).json(sanitizeRoom(room));
   } catch (err) {
+    console.error(`Room create failed for user ${req.user.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to create room' });
   }
 });
@@ -82,7 +83,8 @@ router.get('/browse', requireAuth, (req, res) => {
   try {
     const rooms = searchNamedRooms.all(`%${q}%`);
     res.json(rooms.map(sanitizeRoom));
-  } catch {
+  } catch (err) {
+    console.error('Room browse failed:', err.message);
     return res.status(500).json({ error: 'Failed to search rooms' });
   }
 });
@@ -126,7 +128,8 @@ router.post('/direct', requireAuth, (req, res) => {
       return res.json(sanitizeRoom(result.room));
     }
     res.status(201).json(sanitizeRoom(result.room));
-  } catch {
+  } catch (err) {
+    console.error(`Direct room create failed for user ${req.user.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to create direct room' });
   }
 });
@@ -136,7 +139,8 @@ router.get('/', requireAuth, (req, res) => {
   try {
     const rooms = getUserRooms.all(req.user.id);
     res.json(rooms.map(sanitizeRoom));
-  } catch {
+  } catch (err) {
+    console.error(`Room list failed for user ${req.user.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to fetch rooms' });
   }
 });
@@ -152,7 +156,8 @@ router.get('/:id', requireAuth, (req, res) => {
 
     const members = getRoomMembers.all(req.params.id);
     res.json({ ...sanitizeRoom(room), members });
-  } catch {
+  } catch (err) {
+    console.error(`Room detail failed for room ${req.params.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to fetch room' });
   }
 });
@@ -169,7 +174,8 @@ router.delete('/:id', requireAuth, (req, res) => {
 
     deleteRoom.run(req.params.id);
     res.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error(`Room delete failed for room ${req.params.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to delete room' });
   }
 });
@@ -207,7 +213,8 @@ router.post('/:id/join', requireAuth, (req, res) => {
 
     if (result) return res.status(400).json(result);
     res.json(sanitizeRoom(room));
-  } catch {
+  } catch (err) {
+    console.error(`Room join failed for user ${req.user.id}, room ${req.params.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to join room' });
   }
 });
@@ -249,7 +256,8 @@ router.post('/join-by-code', requireAuth, (req, res) => {
 
     if (result) return res.status(400).json(result);
     res.json(sanitizeRoom(room));
-  } catch {
+  } catch (err) {
+    console.error(`Room join-by-code failed for user ${req.user.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to join room' });
   }
 });
@@ -271,7 +279,8 @@ router.post('/:id/leave', requireAuth, (req, res) => {
 
     removeRoomMember.run(req.params.id, req.user.id);
     res.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error(`Room leave failed for user ${req.user.id}, room ${req.params.id}:`, err.message);
     return res.status(500).json({ error: 'Failed to leave room' });
   }
 });

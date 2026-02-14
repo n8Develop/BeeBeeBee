@@ -29,7 +29,8 @@ export function initSocket(httpServer) {
       if (!user) return next(new Error('Not authenticated'));
       socket.user = { id: user.id, username: user.username };
       next();
-    } catch {
+    } catch (err) {
+      console.error('Socket auth failed:', err.message);
       next(new Error('Not authenticated'));
     }
   });

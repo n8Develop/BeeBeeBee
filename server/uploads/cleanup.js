@@ -26,5 +26,7 @@ function cleanupOldFiles() {
 
 export function startCleanupInterval() {
   cleanupOldFiles();
-  setInterval(cleanupOldFiles, INTERVAL_MS);
+  const id = setInterval(cleanupOldFiles, INTERVAL_MS);
+  id.unref?.();
+  return id;
 }

@@ -32,7 +32,8 @@ router.post('/', requireAuth, upload.single('image'), (req, res) => {
     const filePath = path.join(UPLOADS_DIR, filename);
     fs.writeFileSync(filePath, req.file.buffer);
     res.json({ url: `/uploads/messages/${filename}` });
-  } catch {
+  } catch (err) {
+    console.error('Image upload failed:', err.message);
     return res.status(500).json({ error: 'Failed to save image' });
   }
 });

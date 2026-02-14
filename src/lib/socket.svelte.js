@@ -26,12 +26,14 @@ function createSocket() {
   function setupListeners(sock) {
     sock.on('connect', () => {
       // Re-join room after reconnect (connect fires on initial + reconnect)
-      if (reconnecting && currentRoomId) {
-        sock.emit('room:join', { roomId: currentRoomId });
-      }
+      // Capture roomId to avoid race if user switches rooms during reconnect
+      const roomToRejoin = reconnecting ? currentRoomId : null;
       connected = true;
       reconnecting = false;
       error = null;
+      if (roomToRejoin && roomToRejoin === currentRoomId) {
+        sock.emit('room:join', { roomId: roomToRejoin });
+      }
     });
 
     sock.on('disconnect', () => {

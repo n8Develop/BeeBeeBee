@@ -18,6 +18,11 @@ import { httpRateLimit } from './middleware/httpRateLimit.js';
 const app = express();
 const server = createServer(app);
 
+// Trust first proxy (nginx, Cloudflare, etc.) for correct req.ip
+if (config.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 initSocket(server);
 
 app.use(compression());
@@ -25,6 +30,11 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  if (config.NODE_ENV === 'production') {
+    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' ws: wss:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'");
+  }
   next();
 });
 app.use(cors({ origin: config.FRONTEND_URL, credentials: true }));

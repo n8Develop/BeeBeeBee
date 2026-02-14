@@ -12,7 +12,8 @@ export function requireAuth(req, res, next) {
     if (!user) return res.status(401).json({ error: 'Not authenticated' });
     req.user = user;
     next();
-  } catch {
+  } catch (err) {
+    console.error('JWT verification failed:', err.message);
     return res.status(401).json({ error: 'Not authenticated' });
   }
 }
