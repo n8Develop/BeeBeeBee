@@ -12,7 +12,7 @@ const router = Router();
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const COOKIE_OPTS = {
   httpOnly: true,
-  secure: config.NODE_ENV === 'production',
+  secure: config.NODE_ENV === 'production' && config.FRONTEND_URL.startsWith('https'),
   sameSite: 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: '/'
