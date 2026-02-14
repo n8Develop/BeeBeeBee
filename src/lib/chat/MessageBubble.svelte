@@ -53,7 +53,7 @@
   .message-bubble {
     padding: 8px 12px;
     margin: 4px 0;
-    background: #16213e;
+    background: var(--bg-panel);
     border-radius: 8px;
     border: 1px solid #2a2a4e;
     max-width: 100%;
@@ -74,7 +74,7 @@
   .username {
     font-size: 12px;
     font-weight: 600;
-    color: #7eb8da;
+    color: var(--accent);
   }
 
   .own .username {
@@ -83,7 +83,7 @@
 
   .time {
     font-size: 11px;
-    color: #666;
+    color: var(--text-dim);
   }
 
   .delete-btn {
@@ -93,7 +93,7 @@
     border: none;
     border-radius: 3px;
     background: transparent;
-    color: #666;
+    color: var(--text-dim);
     font-size: 12px;
     cursor: pointer;
     display: flex;
@@ -102,7 +102,7 @@
     line-height: 1;
   }
 
-  .delete-btn:hover {
+  .delete-btn:hover, .delete-btn:active {
     background: #4a1a1a;
     color: #e55;
   }

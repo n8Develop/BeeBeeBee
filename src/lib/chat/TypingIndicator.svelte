@@ -27,7 +27,7 @@
     gap: 6px;
     padding: 4px 12px;
     font-size: 12px;
-    color: #888;
+    color: var(--text-muted);
     min-height: 24px;
   }
 
@@ -40,7 +40,7 @@
   .dot {
     width: 5px;
     height: 5px;
-    background: #888;
+    background: var(--text-muted);
     border-radius: 50%;
     animation: bounce 1.4s infinite ease-in-out both;
   }

@@ -115,8 +115,8 @@
   }
 
   .join-card {
-    background: #16213e;
-    border: 1px solid #334;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 32px;
     width: 100%;
@@ -127,12 +127,12 @@
   h1 {
     font-size: 24px;
     font-weight: 700;
-    color: #eee;
+    color: var(--text);
     margin-bottom: 20px;
   }
 
   .status-text {
-    color: #888;
+    color: var(--text-muted);
     font-size: 14px;
   }
 
@@ -162,17 +162,17 @@
 
   input {
     padding: 8px 10px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 6px;
-    background: #1a1a2e;
-    color: #eee;
-    font-size: 14px;
+    background: var(--bg-deep);
+    color: var(--text);
+    font-size: 16px;
     font-family: inherit;
     outline: none;
   }
 
   input:focus {
-    border-color: #7eb8da;
+    border-color: var(--accent);
   }
 
   input::placeholder {
@@ -189,14 +189,14 @@
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 14px;
     cursor: pointer;
     transition: background 0.15s;
   }
 
-  .submit-btn:hover:not(:disabled) {
+  .submit-btn:hover:not(:disabled), .submit-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 
@@ -208,12 +208,12 @@
   .back-link {
     display: inline-block;
     margin-top: 16px;
-    color: #7eb8da;
+    color: var(--accent);
     text-decoration: none;
     font-size: 14px;
   }
 
-  .back-link:hover {
+  .back-link:hover, .back-link:active {
     text-decoration: underline;
   }
 </style>

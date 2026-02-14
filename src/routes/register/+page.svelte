@@ -68,7 +68,7 @@
     border: 1px solid #444;
     border-radius: 4px;
     background: #2a2a3e;
-    color: #eee;
+    color: var(--text);
     font-size: 1rem;
   }
   button {

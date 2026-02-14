@@ -50,6 +50,8 @@
     flex-direction: column;
     gap: 2px;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .chat-feed::-webkit-scrollbar {
@@ -61,7 +63,7 @@
   }
 
   .chat-feed::-webkit-scrollbar-thumb {
-    background: #334;
+    background: var(--border);
     border-radius: 3px;
   }
 
@@ -70,7 +72,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
+    color: var(--text-dim);
     font-style: italic;
     font-size: 14px;
   }

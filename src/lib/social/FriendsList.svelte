@@ -57,13 +57,13 @@
   h3 {
     font-size: 15px;
     font-weight: 600;
-    color: #eee;
+    color: var(--text);
     margin-bottom: 10px;
   }
 
   .empty {
     font-size: 13px;
-    color: #888;
+    color: var(--text-muted);
   }
 
   ul {
@@ -78,7 +78,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
-    background: #16213e;
+    background: var(--bg-panel);
     border: 1px solid #2a2a4e;
     border-radius: 8px;
   }
@@ -94,7 +94,7 @@
   .friend-name {
     font-size: 14px;
     font-weight: 500;
-    color: #eee;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -102,7 +102,7 @@
 
   .friend-status {
     font-size: 11px;
-    color: #888;
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -126,16 +126,16 @@
 
   .dm-btn {
     padding: 5px 12px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 12px;
     cursor: pointer;
     flex-shrink: 0;
   }
 
-  .dm-btn:hover:not(:disabled) {
+  .dm-btn:hover:not(:disabled), .dm-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 

@@ -1,18 +1,32 @@
+:root {
+  --bg-deep: #1a1a2e;
+  --bg-panel: #16213e;
+  --bg-sidebar: #12192e;
+  --accent: #7eb8da;
+  --accent-btn: #2a5a8a;
+  --border: #334;
+  --text: #eee;
+  --text-muted: #888;
+  --text-dim: #666;
+  --text-subtle: #ccc;
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  background: #1a1a2e;
-  color: #eee;
+  background: var(--bg-deep);
+  color: var(--text);
   min-height: 100vh;
 }
 
 a {
-  color: #7eb8da;
+  color: var(--accent);
 }

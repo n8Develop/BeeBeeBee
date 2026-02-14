@@ -1,3 +1,6 @@
+export const CANVAS_WIDTH = 600;
+export const CANVAS_HEIGHT = 200;
+
 // Canvas state singleton — follows createAuth() pattern
 
 function createCanvasState() {
@@ -74,7 +77,7 @@ function createCanvasState() {
 
     exportOps() {
       if (flushCallback) flushCallback();
-      return { operations: [...operations], width: 600, height: 200 };
+      return { operations: [...operations], width: CANVAS_WIDTH, height: CANVAS_HEIGHT };
     },
 
     importOps(data) {

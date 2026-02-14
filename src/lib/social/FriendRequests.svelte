@@ -98,7 +98,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
-    background: #16213e;
+    background: var(--bg-panel);
     border: 1px solid #2a2a4e;
     border-radius: 8px;
   }
@@ -106,7 +106,7 @@
   .req-name {
     flex: 1;
     font-size: 14px;
-    color: #eee;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -123,12 +123,12 @@
     border: none;
     border-radius: 4px;
     background: #2a7a4a;
-    color: #eee;
+    color: var(--text);
     font-size: 12px;
     cursor: pointer;
   }
 
-  .accept-btn:hover:not(:disabled) {
+  .accept-btn:hover:not(:disabled), .accept-btn:active:not(:disabled) {
     background: #3a9a5a;
   }
 
@@ -142,7 +142,7 @@
     cursor: pointer;
   }
 
-  .decline-btn:hover:not(:disabled) {
+  .decline-btn:hover:not(:disabled), .decline-btn:active:not(:disabled) {
     background: #3a1a1a;
   }
 

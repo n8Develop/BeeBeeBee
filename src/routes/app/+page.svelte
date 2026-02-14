@@ -70,7 +70,7 @@
   h1 {
     font-size: 24px;
     font-weight: 700;
-    color: #eee;
+    color: var(--text);
   }
 
   .user-info {
@@ -85,16 +85,16 @@
   }
 
   .username strong {
-    color: #7eb8da;
+    color: var(--accent);
   }
 
   .settings-btn {
     width: 30px;
     height: 30px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background: #444;
-    color: #eee;
+    color: var(--text);
     font-size: 16px;
     cursor: pointer;
     display: flex;
@@ -103,21 +103,21 @@
     line-height: 1;
   }
 
-  .settings-btn:hover {
+  .settings-btn:hover, .settings-btn:active {
     background: #555;
   }
 
   .logout-btn {
     padding: 5px 12px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background: #444;
-    color: #eee;
+    color: var(--text);
     font-size: 12px;
     cursor: pointer;
   }
 
-  .logout-btn:hover {
+  .logout-btn:hover, .logout-btn:active {
     background: #555;
   }
 
@@ -125,7 +125,7 @@
     display: flex;
     width: 100%;
     max-width: 600px;
-    border-bottom: 1px solid #334;
+    border-bottom: 1px solid var(--border);
     gap: 0;
   }
 
@@ -134,7 +134,7 @@
     padding: 10px;
     border: none;
     background: transparent;
-    color: #888;
+    color: var(--text-muted);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -143,11 +143,11 @@
   }
 
   .tab.active {
-    color: #7eb8da;
-    border-bottom-color: #7eb8da;
+    color: var(--accent);
+    border-bottom-color: var(--accent);
   }
 
-  .tab:hover:not(.active) {
+  .tab:hover:not(.active), .tab:active:not(.active) {
     color: #aaa;
   }
 

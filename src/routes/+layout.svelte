@@ -23,6 +23,6 @@
     justify-content: center;
     height: 100vh;
     font-size: 1.2rem;
-    color: #888;
+    color: var(--text-muted);
   }
 </style>

@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { MediaQuery } from 'svelte/reactivity';
   import { auth } from '$lib/auth.svelte.js';
   import { socket } from '$lib/socket.svelte.js';
   import { api } from '$lib/api.js';
@@ -9,6 +10,8 @@
   import ChatFeed from '$lib/chat/ChatFeed.svelte';
   import MessageInput from '$lib/chat/MessageInput.svelte';
   import TypingIndicator from '$lib/chat/TypingIndicator.svelte';
+
+  const isMobile = new MediaQuery('(max-width: 768px)');
 
   let { data } = $props();
   let roomId = data.roomId;
@@ -93,13 +96,15 @@
       </button>
     {/if}
     <div class="header-right">
-      <button class="header-toggle" class:active={showFriends} onclick={() => { showFriends = !showFriends; }}>
-        Friends
+      <button class="header-toggle" class:active={showFriends} onclick={() => { showFriends = !showFriends; }} title="Friends">
+        <span class="btn-icon" aria-hidden="true">&#9734;</span><span class="btn-label">Friends</span>
       </button>
-      <button class="header-toggle" class:active={showMembers} onclick={() => { showMembers = !showMembers; }}>
-        Members
+      <button class="header-toggle" class:active={showMembers} onclick={() => { showMembers = !showMembers; }} title="Members">
+        <span class="btn-icon" aria-hidden="true">&#9776;</span><span class="btn-label">Members</span>
       </button>
-      <button class="leave-btn" onclick={handleLeaveRoom}>Leave</button>
+      <button class="leave-btn" onclick={handleLeaveRoom} title="Leave room">
+        <span class="btn-icon" aria-hidden="true">&#10005;</span><span class="btn-label">Leave</span>
+      </button>
     </div>
   </header>
 
@@ -124,6 +129,11 @@
   {/if}
 
   <div class="room-body">
+    <!-- Mobile backdrop -->
+    {#if isMobile.current && (showMembers || showFriends)}
+      <div class="sidebar-backdrop" onclick={() => { showMembers = false; showFriends = false; }} role="presentation"></div>
+    {/if}
+
     <!-- Members sidebar (left, toggleable) -->
     {#if showMembers}
       <aside class="members-sidebar">
@@ -172,8 +182,15 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
     overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .room-page { padding-bottom: env(safe-area-inset-bottom); }
   }
 
   .room-header {
@@ -181,8 +198,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 16px;
-    background: #16213e;
-    border-bottom: 1px solid #334;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     gap: 12px;
   }
@@ -196,17 +213,17 @@
 
   .back-btn {
     padding: 4px 10px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background: transparent;
-    color: #7eb8da;
+    color: var(--accent);
     font-size: 18px;
     cursor: pointer;
     line-height: 1;
     flex-shrink: 0;
   }
 
-  .back-btn:hover {
+  .back-btn:hover, .back-btn:active {
     background: #2a2a4e;
   }
 
@@ -217,7 +234,7 @@
   .room-title h1 {
     font-size: 16px;
     font-weight: 600;
-    color: #eee;
+    color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -225,7 +242,7 @@
 
   .member-count {
     font-size: 11px;
-    color: #888;
+    color: var(--text-muted);
   }
 
   .invite-code {
@@ -233,26 +250,26 @@
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background: transparent;
     cursor: pointer;
     flex-shrink: 0;
   }
 
-  .invite-code:hover {
+  .invite-code:hover, .invite-code:active {
     background: #2a2a4e;
   }
 
   .invite-label {
     font-size: 11px;
-    color: #888;
+    color: var(--text-muted);
   }
 
   .invite-value {
     font-family: monospace;
     font-size: 12px;
-    color: #7eb8da;
+    color: var(--accent);
   }
 
   .invite-copy {
@@ -269,20 +286,28 @@
 
   .header-toggle {
     padding: 5px 10px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background: #444;
-    color: #eee;
+    color: var(--text);
     font-size: 12px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  .header-toggle:hover {
+  .btn-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .header-toggle:hover, .header-toggle:active {
     background: #555;
   }
 
   .header-toggle.active {
-    background: #2a5a8a;
+    background: var(--accent-btn);
     border-color: #3a7aba;
   }
 
@@ -294,9 +319,12 @@
     color: #eaa;
     font-size: 12px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  .leave-btn:hover {
+  .leave-btn:hover, .leave-btn:active {
     background: #6a3a3a;
   }
 
@@ -337,12 +365,20 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    position: relative;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9;
   }
 
   .members-sidebar {
     width: 180px;
-    border-right: 1px solid #334;
-    background: #12192e;
+    border-right: 1px solid var(--border);
+    background: var(--bg-sidebar);
     padding: 12px;
     overflow-y: auto;
     flex-shrink: 0;
@@ -371,11 +407,11 @@
     padding: 4px 6px;
     border-radius: 4px;
     font-size: 13px;
-    color: #888;
+    color: var(--text-muted);
   }
 
   .member.online {
-    color: #eee;
+    color: var(--text);
   }
 
   .status-dot {
@@ -411,15 +447,15 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    color: #888;
+    color: var(--text-muted);
     font-size: 14px;
   }
 
   .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #334;
-    border-top-color: #7eb8da;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -430,12 +466,13 @@
 
   .friends-sidebar {
     width: 220px;
-    border-left: 1px solid #334;
-    background: #12192e;
+    border-left: 1px solid var(--border);
+    background: var(--bg-sidebar);
     overflow-y: auto;
     flex-shrink: 0;
   }
 
+  /* --- Mobile: 768px and below --- */
   @media (max-width: 768px) {
     .room-header {
       padding: 8px 10px;
@@ -447,11 +484,47 @@
     }
 
     .members-sidebar {
-      width: 150px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 10;
+      width: 280px;
+      max-width: 80vw;
+      border-right: 1px solid var(--border);
     }
 
     .friends-sidebar {
-      width: 180px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 10;
+      width: 280px;
+      max-width: 80vw;
+      border-left: 1px solid var(--border);
+    }
+  }
+
+  /* --- Compact: 480px and below --- */
+  @media (max-width: 480px) {
+    .room-title h1 {
+      max-width: 120px;
+    }
+
+    .header-right {
+      gap: 4px;
+    }
+
+    .btn-label {
+      display: none;
+    }
+
+    .header-toggle,
+    .leave-btn {
+      min-width: 32px;
+      min-height: 32px;
+      padding: 4px 6px;
     }
   }
 </style>

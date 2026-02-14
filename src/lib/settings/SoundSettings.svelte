@@ -88,14 +88,14 @@
 
   input[type="range"] {
     flex: 1;
-    accent-color: #7eb8da;
+    accent-color: var(--accent);
     height: 4px;
   }
 
   .slider-value {
     width: 40px;
     font-size: 12px;
-    color: #888;
+    color: var(--text-muted);
     text-align: right;
     flex-shrink: 0;
   }
@@ -104,14 +104,14 @@
     padding: 8px 20px;
     border: none;
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
     align-self: flex-start;
   }
 
-  .save-btn:hover:not(:disabled) {
+  .save-btn:hover:not(:disabled), .save-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 

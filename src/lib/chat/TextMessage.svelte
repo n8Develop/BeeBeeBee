@@ -18,6 +18,6 @@
     white-space: pre-wrap;
     line-height: 1.4;
     font-size: 14px;
-    color: #eee;
+    color: var(--text);
   }
 </style>

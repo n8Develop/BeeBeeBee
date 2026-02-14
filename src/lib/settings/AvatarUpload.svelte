@@ -108,15 +108,15 @@
 
   .upload-btn {
     padding: 8px 20px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
   }
 
-  .upload-btn:hover:not(:disabled) {
+  .upload-btn:hover:not(:disabled), .upload-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 

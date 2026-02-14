@@ -1,6 +1,6 @@
 <script>
   import { onDestroy } from 'svelte';
-  import { canvasState } from './state.svelte.js';
+  import { canvasState, CANVAS_WIDTH, CANVAS_HEIGHT } from './state.svelte.js';
   import { replayOperations, getTextWrapInfo } from './render.js';
   import { getActiveTool, commitText } from './tools.js';
   import { palette } from './palette.js';
@@ -46,6 +46,15 @@
   onDestroy(() => {
     stopCursorBlink();
   });
+
+  function getCanvasScale() {
+    if (!canvasEl) return { scaleX: 1, scaleY: 1 };
+    const rect = canvasEl.getBoundingClientRect();
+    return {
+      scaleX: canvasEl.width / rect.width,
+      scaleY: canvasEl.height / rect.height
+    };
+  }
 
   $effect(() => {
     if (canvasEl && !initialized) {
@@ -117,7 +126,7 @@
 
     if (textBuffer) {
       ctx.fillStyle = canvasState.color;
-      const info = getTextWrapInfo(ctx, textBuffer, textCursorX, fontSize, 600);
+      const info = getTextWrapInfo(ctx, textBuffer, textCursorX, fontSize, CANVAS_WIDTH);
       let y = textCursorY;
       for (const line of info.lines) {
         ctx.fillText(line, textCursorX, y);
@@ -142,7 +151,7 @@
         const fontSize = canvasState.fontSize;
         const lineHeight = fontSize + 4;
         ctx.font = `${fontSize}px system-ui, sans-serif`;
-        const info = getTextWrapInfo(ctx, textBuffer, textCursorX, fontSize, 600);
+        const info = getTextWrapInfo(ctx, textBuffer, textCursorX, fontSize, CANVAS_WIDTH);
         textCursorX = textCursorX + info.lastLineWidth;
         textCursorY = textCursorY + (info.lines.length - 1) * lineHeight;
       }
@@ -169,8 +178,9 @@
     if (canvasState.tool === 'textbox') {
       commitPendingText();
       const rect = canvasEl.getBoundingClientRect();
-      textCursorX = e.clientX - rect.left;
-      textCursorY = e.clientY - rect.top;
+      const { scaleX, scaleY } = getCanvasScale();
+      textCursorX = (e.clientX - rect.left) * scaleX;
+      textCursorY = (e.clientY - rect.top) * scaleY;
       textboxPlaced = true;
       startCursorBlink();
       replayOperations(ctx, canvasState.operations);
@@ -331,8 +341,8 @@
     <div class="canvas-wrap">
       <canvas
         bind:this={canvasEl}
-        width={600}
-        height={200}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
         style="touch-action: none;"
         aria-label="Drawing canvas"
         onpointerdown={handlePointerDown}
@@ -414,9 +424,10 @@
     align-items: center;
     gap: 6px;
     padding: 8px;
-    background: #16213e;
+    background: var(--bg-panel);
     border-radius: 8px;
-    width: fit-content;
+    width: 100%;
+    max-width: fit-content;
   }
 
   .canvas-container:focus {
@@ -427,6 +438,8 @@
     display: flex;
     align-items: flex-start;
     gap: 6px;
+    width: 100%;
+    max-width: 700px;
   }
 
   /* Left tool strip */
@@ -434,6 +447,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-shrink: 0;
   }
 
   .tool-grid {
@@ -445,10 +459,10 @@
   .icon-btn {
     width: 28px;
     height: 28px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 3px;
-    background: #1a1a2e;
-    color: #ccc;
+    background: var(--bg-deep);
+    color: var(--text-subtle);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -456,7 +470,7 @@
     padding: 0;
   }
 
-  .icon-btn:hover {
+  .icon-btn:hover, .icon-btn:active {
     background: #2a2a4e;
   }
 
@@ -478,23 +492,28 @@
 
   .tool-divider {
     height: 1px;
-    background: #334;
+    background: var(--border);
     margin: 2px 0;
   }
 
   /* Center canvas */
   .canvas-wrap {
     position: relative;
-    border: 2px solid #334;
+    border: 2px solid var(--border);
     border-radius: 2px;
     line-height: 0;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
+    max-width: 600px;
   }
 
   canvas {
     background: #fff;
     cursor: crosshair;
     display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 1;
   }
 
   /* Right options panel */
@@ -502,6 +521,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex-shrink: 0;
   }
 
   .palette {
@@ -532,7 +552,7 @@
 
   .size-label {
     font-size: 10px;
-    color: #888;
+    color: var(--text-muted);
     text-align: center;
   }
 
@@ -546,10 +566,10 @@
   .size-btn {
     width: 26px;
     height: 26px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 3px;
-    background: #1a1a2e;
-    color: #ccc;
+    background: var(--bg-deep);
+    color: var(--text-subtle);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -563,7 +583,7 @@
   }
 
   .size-dot {
-    background: #ccc;
+    background: var(--text-subtle);
     border-radius: 50%;
     display: block;
   }
@@ -573,18 +593,19 @@
     gap: 4px;
     flex-wrap: wrap;
     padding: 6px;
-    background: #1a1a2e;
-    border: 1px solid #334;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
     border-radius: 4px;
+    max-width: 100%;
   }
 
   .stamp-btn {
     width: 32px;
     height: 32px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 3px;
-    background: #16213e;
-    color: #ccc;
+    background: var(--bg-panel);
+    color: var(--text-subtle);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -598,7 +619,7 @@
     color: #fff;
   }
 
-  .stamp-btn:hover {
+  .stamp-btn:hover, .stamp-btn:active {
     background: #2a2a4e;
   }
 
@@ -613,15 +634,96 @@
       justify-content: center;
     }
 
+    .canvas-wrap {
+      flex: unset;
+      width: 100%;
+      max-width: 100%;
+    }
+
     .options-panel {
       flex-direction: row;
       flex-wrap: wrap;
       gap: 6px;
-      max-width: 600px;
+      max-width: 100%;
     }
 
     .palette {
       grid-template-columns: repeat(7, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .canvas-layout {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .tool-strip {
+      flex-direction: row;
+      gap: 4px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tool-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tool-divider {
+      width: 1px;
+      height: auto;
+      margin: 0 2px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+    }
+
+    .icon-spacer {
+      display: none;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .options-panel {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .palette {
+      grid-template-columns: repeat(14, 1fr);
+      gap: 2px;
+    }
+
+    .color-swatch {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+    }
+
+    .size-btn {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+    }
+
+    .stamp-picker {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stamp-btn {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      flex-shrink: 0;
     }
   }
 </style>

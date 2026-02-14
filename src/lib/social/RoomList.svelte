@@ -125,7 +125,7 @@
   h2 {
     font-size: 18px;
     font-weight: 600;
-    color: #eee;
+    color: var(--text);
   }
 
   .header-actions {
@@ -135,23 +135,23 @@
 
   .action-btn {
     padding: 6px 14px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
     transition: background 0.15s;
   }
 
-  .action-btn:hover {
+  .action-btn:hover, .action-btn:active {
     background: #3a7aba;
   }
 
   .status {
     text-align: center;
     padding: 32px 16px;
-    color: #888;
+    color: var(--text-muted);
     font-size: 14px;
   }
 
@@ -174,7 +174,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: #16213e;
+    background: var(--bg-panel);
     border: 1px solid #2a2a4e;
     border-radius: 8px;
     cursor: pointer;
@@ -185,7 +185,7 @@
     font-family: inherit;
   }
 
-  .room-card:hover {
+  .room-card:hover, .room-card:active {
     background: #1e2d4a;
     border-color: #3a4a6e;
   }
@@ -199,12 +199,12 @@
   .room-name {
     font-size: 15px;
     font-weight: 500;
-    color: #eee;
+    color: var(--text);
   }
 
   .room-members {
     font-size: 12px;
-    color: #888;
+    color: var(--text-muted);
   }
 
   .room-code {
@@ -212,8 +212,8 @@
     align-items: center;
     gap: 4px;
     font-size: 11px;
-    color: #666;
-    background: #1a1a2e;
+    color: var(--text-dim);
+    background: var(--bg-deep);
     padding: 3px 8px;
     border-radius: 4px;
   }
@@ -223,7 +223,7 @@
   }
 
   .code-value {
-    color: #7eb8da;
+    color: var(--accent);
     font-family: monospace;
     font-size: 12px;
   }
@@ -245,7 +245,7 @@
 
   .room-badge.dm {
     background: #2a3a5a;
-    color: #7eb8da;
+    color: var(--accent);
   }
 
   .room-badge.named {

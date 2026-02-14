@@ -83,21 +83,21 @@
     align-items: center;
     gap: 3px;
     padding: 2px 6px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 12px;
-    background: #1a1a2e;
-    color: #ccc;
+    background: var(--bg-deep);
+    color: var(--text-subtle);
     font-size: 12px;
     cursor: pointer;
     transition: background 0.15s;
   }
 
-  .reaction-chip:hover {
+  .reaction-chip:hover, .reaction-chip:active {
     background: #2a2a4e;
   }
 
   .reaction-chip.reacted {
-    border-color: #7eb8da;
+    border-color: var(--accent);
     background: #1e2d4a;
   }
 
@@ -117,10 +117,10 @@
   .add-reaction-btn {
     width: 24px;
     height: 24px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 50%;
-    background: #1a1a2e;
-    color: #888;
+    background: var(--bg-deep);
+    color: var(--text-muted);
     font-size: 14px;
     cursor: pointer;
     display: flex;
@@ -129,9 +129,9 @@
     line-height: 1;
   }
 
-  .add-reaction-btn:hover {
+  .add-reaction-btn:hover, .add-reaction-btn:active {
     background: #2a2a4e;
-    color: #eee;
+    color: var(--text);
   }
 
   .emoji-picker {
@@ -141,8 +141,8 @@
     display: flex;
     gap: 2px;
     padding: 6px;
-    background: #16213e;
-    border: 1px solid #334;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 10;
@@ -162,7 +162,7 @@
     justify-content: center;
   }
 
-  .emoji-option:hover {
+  .emoji-option:hover, .emoji-option:active {
     background: #2a2a4e;
   }
 </style>

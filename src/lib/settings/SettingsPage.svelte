@@ -52,23 +52,23 @@
 
   .back-btn {
     padding: 6px 12px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 4px;
     background: transparent;
-    color: #7eb8da;
+    color: var(--accent);
     font-size: 14px;
     cursor: pointer;
     flex-shrink: 0;
   }
 
-  .back-btn:hover {
+  .back-btn:hover, .back-btn:active {
     background: #2a2a4e;
   }
 
   h1 {
     font-size: 20px;
     font-weight: 700;
-    color: #eee;
+    color: var(--text);
   }
 
   .sections {
@@ -78,7 +78,7 @@
   }
 
   .section {
-    background: #16213e;
+    background: var(--bg-panel);
     border: 1px solid #2a2a4e;
     border-radius: 12px;
     padding: 20px;
@@ -87,7 +87,7 @@
   h2 {
     font-size: 16px;
     font-weight: 600;
-    color: #eee;
+    color: var(--text);
     margin-bottom: 16px;
     padding-bottom: 8px;
     border-bottom: 1px solid #2a2a4e;

@@ -105,18 +105,18 @@
   input {
     width: 100%;
     padding: 8px 10px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 6px;
-    background: #1a1a2e;
-    color: #eee;
-    font-size: 14px;
+    background: var(--bg-deep);
+    color: var(--text);
+    font-size: 16px;
     font-family: inherit;
     outline: none;
     box-sizing: border-box;
   }
 
   input:focus {
-    border-color: #7eb8da;
+    border-color: var(--accent);
   }
 
   input::placeholder {
@@ -125,7 +125,7 @@
 
   .status {
     font-size: 13px;
-    color: #888;
+    color: var(--text-muted);
     text-align: center;
     padding: 12px;
   }
@@ -146,7 +146,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 12px;
-    background: #16213e;
+    background: var(--bg-panel);
     border: 1px solid #2a2a4e;
     border-radius: 8px;
   }
@@ -161,7 +161,7 @@
   .room-name {
     font-size: 14px;
     font-weight: 500;
-    color: #eee;
+    color: var(--text);
   }
 
   .lock {
@@ -171,21 +171,21 @@
 
   .room-meta {
     font-size: 11px;
-    color: #888;
+    color: var(--text-muted);
   }
 
   .join-btn {
     padding: 5px 14px;
     border: none;
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 12px;
     cursor: pointer;
     flex-shrink: 0;
   }
 
-  .join-btn:hover:not(:disabled) {
+  .join-btn:hover:not(:disabled), .join-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 

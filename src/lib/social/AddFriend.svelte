@@ -69,17 +69,17 @@
   input {
     flex: 1;
     padding: 8px 10px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 6px;
-    background: #1a1a2e;
-    color: #eee;
-    font-size: 14px;
+    background: var(--bg-deep);
+    color: var(--text);
+    font-size: 16px;
     font-family: inherit;
     outline: none;
   }
 
   input:focus {
-    border-color: #7eb8da;
+    border-color: var(--accent);
   }
 
   input::placeholder {
@@ -90,14 +90,14 @@
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
     flex-shrink: 0;
   }
 
-  .send-btn:hover:not(:disabled) {
+  .send-btn:hover:not(:disabled), .send-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 

@@ -180,8 +180,8 @@
 
 <style>
   .message-input {
-    border-top: 1px solid #334;
-    background: #16213e;
+    border-top: 1px solid var(--border);
+    background: var(--bg-panel);
   }
 
   .send-error {
@@ -205,13 +205,13 @@
     padding: 6px 16px;
     border: none;
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
   }
 
-  .send-drawing-btn:hover:not(:disabled) {
+  .send-drawing-btn:hover:not(:disabled), .send-drawing-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 
@@ -234,7 +234,7 @@
     border: none;
     border-radius: 50%;
     background: transparent;
-    color: #888;
+    color: var(--text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -242,9 +242,9 @@
     flex-shrink: 0;
   }
 
-  .attach-btn:hover:not(:disabled) {
+  .attach-btn:hover:not(:disabled), .attach-btn:active:not(:disabled) {
     background: #2a2a4e;
-    color: #7eb8da;
+    color: var(--accent);
   }
 
   .attach-btn:disabled {
@@ -259,12 +259,12 @@
   .text-input {
     flex: 1;
     padding: 7px 14px;
-    border: 1px solid #334;
+    border: 1px solid var(--border);
     border-radius: 16px;
-    background: #1a1a2e;
-    color: #eee;
+    background: var(--bg-deep);
+    color: var(--text);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 16px;
     outline: none;
     min-width: 0;
     resize: none;
@@ -275,7 +275,7 @@
   }
 
   .text-input:focus {
-    border-color: #7eb8da;
+    border-color: var(--accent);
   }
 
   .text-input::placeholder {
@@ -291,8 +291,8 @@
     height: 32px;
     border: none;
     border-radius: 50%;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -300,7 +300,7 @@
     flex-shrink: 0;
   }
 
-  .send-text-btn:hover:not(:disabled) {
+  .send-text-btn:hover:not(:disabled), .send-text-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 
@@ -315,7 +315,7 @@
     gap: 8px;
     padding: 6px 8px;
     border-top: 1px solid #2a2a4e;
-    background: #1a1a2e;
+    background: var(--bg-deep);
   }
 
   .image-thumb {
@@ -347,7 +347,7 @@
     line-height: 1;
   }
 
-  .image-remove:hover {
+  .image-remove:hover, .image-remove:active {
     background: rgba(200, 50, 50, 0.2);
   }
 
@@ -355,15 +355,15 @@
     padding: 5px 12px;
     border: none;
     border-radius: 4px;
-    background: #2a5a8a;
-    color: #eee;
+    background: var(--accent-btn);
+    color: var(--text);
     font-size: 12px;
     cursor: pointer;
     flex-shrink: 0;
     margin-left: auto;
   }
 
-  .image-send-btn:hover:not(:disabled) {
+  .image-send-btn:hover:not(:disabled), .image-send-btn:active:not(:disabled) {
     background: #3a7aba;
   }
 
